@@ -183,7 +183,7 @@ function t(key) {
 function applyI18n() {
   document.documentElement.lang = currentLang;
   if (ui.btnLang) {
-    ui.btnLang.textContent = currentLang === "th" ? "TH" : "EN";
+    ui.btnLang.textContent = currentLang === "th" ? "🌐 ไทย (TH)" : "🌐 English (EN)";
   }
   document.querySelectorAll("[data-i18n]").forEach((el) => {
     el.textContent = t(el.dataset.i18n);
