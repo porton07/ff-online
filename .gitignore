@@ -1,0 +1,4 @@
+assets_raw/
+crates/game/target/
+*.pdb
+.DS_Store
