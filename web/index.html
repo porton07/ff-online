@@ -3,89 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Feeding Frenzy — Rust + WASM</title>
+  <title>Feeding Frenzy Online</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="app">
-    <header class="topbar">
-      <div class="brand">
-        <span class="badge">RUST + WASM</span>
-        <h1>Feeding Frenzy</h1>
-      </div>
-      <div class="hud-stats" id="hud-stats">
-        <div class="edible-tray" id="edible-tray" title="Edible Fish"></div>
-        <div class="stat">
-          <span class="label">SCORE</span>
-          <span class="value" id="hud-score">0</span>
-        </div>
-        <div class="stat">
-          <span class="label">LIVES</span>
-          <span class="value" id="hud-lives">3</span>
-        </div>
-        <div class="stat" id="hud-time-wrap" hidden>
-          <span class="label">TIME</span>
-          <span class="value" id="hud-time">0:00</span>
-        </div>
-        <div class="meters">
-          <div class="meter-row">
-            <span class="meter-label">GROWTH</span>
-            <div class="meter-track" id="growth-track">
-              <div class="meter-fill growth" id="growth-fill"></div>
-              <div class="tier-ticks" id="tier-ticks"></div>
-            </div>
-          </div>
-          <div class="meter-row">
-            <span class="meter-label" id="frenzy-label">FRENZY 1X</span>
-            <div class="meter-track">
-              <div class="meter-fill frenzy" id="frenzy-fill"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="controls-bar">
-        <button id="btn-mute" class="icon-btn" title="Toggle Sound">🔊</button>
-        <button id="btn-pause" class="icon-btn" title="Pause (Esc)">⏸</button>
-        <button id="btn-menu" class="icon-btn" title="Main Menu">🏠</button>
-      </div>
-    </header>
+  <div class="ocean-bg">
+    <div class="bubble b1"></div>
+    <div class="bubble b2"></div>
+    <div class="bubble b3"></div>
+    <div class="bubble b4"></div>
+    <div class="bubble b5"></div>
+  </div>
 
+  <div id="app">
     <main class="stage-wrap">
       <canvas id="game-canvas" width="800" height="600"></canvas>
+
+      <div class="floating-controls">
+        <button id="btn-mute" class="glass-btn" title="Toggle Sound">🔊</button>
+        <button id="btn-pause" class="glass-btn" title="Pause (Esc)">⏸</button>
+        <button id="btn-menu" class="glass-btn" title="Main Menu">🏠</button>
+      </div>
 
       <div id="buff-bar" class="buff-bar"></div>
       <div id="stage-banner" class="stage-banner"></div>
 
       <!-- Title Overlay -->
       <div id="overlay-title" class="overlay active">
-        <div class="modal title-modal">
-          <div class="title-art"></div>
-          <h2>FEEDING FRENZY</h2>
-          <p class="subtitle">Ported to Rust &amp; WebAssembly • 40 Original Stages • 5 Playable Fish</p>
-          <div class="btn-row">
-            <button id="btn-play-story" class="primary-btn">▶ Play Story Mode</button>
-            <button id="btn-play-timed" class="secondary-btn">⏱ Time Attack</button>
+        <div class="menu-shell">
+          <div class="hero-section">
+            <h1 class="game-logo">FEEDING FRENZY</h1>
+            <p class="hero-sub">40 Stages • 5 Playable Fish • Online Co-Op</p>
           </div>
-          <div class="coop-box">
-            <div class="coop-row">
-              <button id="btn-coop-create" class="secondary-btn">🌐 Create Online Co-Op</button>
-              <div class="coop-join">
-                <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
-                <button id="btn-coop-join" class="secondary-btn">Join</button>
+
+          <div class="menu-columns">
+            <!-- Section 1: Solo & Co-Op -->
+            <div class="menu-card">
+              <div class="section-title">🎮 SOLO PLAY</div>
+              <div class="solo-actions">
+                <button id="btn-play-story" class="btn-gold">
+                  <span class="btn-main">▶ Story Mode</span>
+                  <span class="btn-desc">Start from Stage 1 as Andy</span>
+                </button>
+                <button id="btn-play-timed" class="btn-aqua">
+                  <span class="btn-main">⏱ Time Attack</span>
+                  <span class="btn-desc">Beat the clock for high score</span>
+                </button>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="section-title">🌐 ONLINE CO-OP (2–4 PLAYERS)</div>
+              <div class="coop-panel">
+                <button id="btn-coop-create" class="btn-teal">Create Room</button>
+                <div class="coop-join">
+                  <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
+                  <button id="btn-coop-join" class="btn-aqua-sm">Join</button>
+                </div>
+              </div>
+              <div id="coop-lobby" class="coop-lobby" hidden>
+                <span id="coop-status"></span>
+                <button id="btn-coop-start" class="btn-gold-sm" hidden>▶ Start Co-Op</button>
               </div>
             </div>
-            <div id="coop-lobby" class="coop-lobby" hidden>
-              <span id="coop-status"></span>
-              <button id="btn-coop-start" class="primary-btn" hidden>▶ Start Co-Op</button>
+
+            <!-- Section 2: Stage Select by Character -->
+            <div class="menu-card">
+              <div class="section-title">🗺 STAGE SELECT</div>
+              <div id="char-tabs" class="char-tabs"></div>
+              <div id="stage-grid" class="stage-grid"></div>
             </div>
           </div>
-          <div class="stage-select-header">
-            <span>Select Stage (All 40 Levels):</span>
+
+          <div class="controls-footer">
+            <span><b>Mouse</b> / <b>WASD</b> Swim</span>
+            <span><b>Click</b> / <b>Space</b> Dash</span>
+            <span><b>Right-Click</b> / <b>E</b> JD Suction</span>
+            <span><b>Esc</b> Pause</span>
           </div>
-          <div id="stage-grid" class="stage-grid"></div>
-          <p class="controls-hint">
-            <b>Mouse</b> or <b>WASD / Arrows</b> to Swim • <b>Click / Space</b> to Dash • <b>Right-Click / E</b> for JD Suction • <b>Esc / P</b> to Pause
-          </p>
         </div>
       </div>
 
@@ -94,9 +89,9 @@
         <div class="modal small-modal">
           <h2>PAUSED</h2>
           <div class="btn-col">
-            <button id="btn-resume" class="primary-btn">▶ Resume</button>
-            <button id="btn-restart-stage" class="secondary-btn">↻ Restart Stage</button>
-            <button id="btn-quit-menu" class="secondary-btn">🏠 Main Menu</button>
+            <button id="btn-resume" class="btn-gold">▶ Resume</button>
+            <button id="btn-restart-stage" class="btn-aqua">↻ Restart Stage</button>
+            <button id="btn-quit-menu" class="btn-teal">🏠 Main Menu</button>
           </div>
         </div>
       </div>
@@ -105,8 +100,8 @@
       <div id="overlay-clear" class="overlay">
         <div class="modal small-modal">
           <h2>STAGE CLEAR!</h2>
-          <p id="clear-summary"></p>
-          <button id="btn-next-stage" class="primary-btn">Next Stage ▶</button>
+          <p id="clear-summary" class="modal-summary"></p>
+          <button id="btn-next-stage" class="btn-gold">Next Stage ▶</button>
         </div>
       </div>
 
@@ -114,10 +109,10 @@
       <div id="overlay-gameover" class="overlay">
         <div class="modal small-modal">
           <h2 id="gameover-title">GAME OVER</h2>
-          <p id="gameover-summary"></p>
-          <div class="btn-row">
-            <button id="btn-retry" class="primary-btn">↻ Try Again</button>
-            <button id="btn-go-menu" class="secondary-btn">🏠 Main Menu</button>
+          <p id="gameover-summary" class="modal-summary"></p>
+          <div class="btn-col">
+            <button id="btn-retry" class="btn-gold">↻ Try Again</button>
+            <button id="btn-go-menu" class="btn-teal">🏠 Main Menu</button>
           </div>
         </div>
       </div>

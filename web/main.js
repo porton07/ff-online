@@ -2,17 +2,9 @@ const canvas = document.getElementById("game-canvas");
 const ctx = canvas.getContext("2d");
 
 const ui = {
-  score: document.getElementById("hud-score"),
-  lives: document.getElementById("hud-lives"),
-  timeWrap: document.getElementById("hud-time-wrap"),
-  time: document.getElementById("hud-time"),
-  growthFill: document.getElementById("growth-fill"),
-  tierTicks: document.getElementById("tier-ticks"),
-  frenzyLabel: document.getElementById("frenzy-label"),
-  frenzyFill: document.getElementById("frenzy-fill"),
   buffBar: document.getElementById("buff-bar"),
   stageBanner: document.getElementById("stage-banner"),
-  edibleTray: document.getElementById("edible-tray"),
+  charTabs: document.getElementById("char-tabs"),
   stageGrid: document.getElementById("stage-grid"),
   ovTitle: document.getElementById("overlay-title"),
   ovPause: document.getElementById("overlay-pause"),
@@ -27,6 +19,8 @@ const ui = {
   btnCoopStart: document.getElementById("btn-coop-start"),
   coopCodeInput: document.getElementById("coop-code-input"),
 };
+
+let selectedChar = "Andy";
 
 let coop = {
   ws: null,
@@ -117,11 +111,32 @@ function readStr(ptr, len) {
 }
 
 function buildStageGrid() {
+  const chars = [];
+  manifest.forEach((entry) => {
+    if (!chars.includes(entry.character)) chars.push(entry.character);
+  });
+  if (!chars.includes(selectedChar) && chars.length > 0) {
+    selectedChar = chars[0];
+  }
+
+  ui.charTabs.innerHTML = "";
+  chars.forEach((ch) => {
+    const tab = document.createElement("button");
+    tab.className = "char-tab" + (ch === selectedChar ? " active" : "");
+    tab.textContent = ch;
+    tab.onclick = () => {
+      selectedChar = ch;
+      buildStageGrid();
+    };
+    ui.charTabs.appendChild(tab);
+  });
+
   ui.stageGrid.innerHTML = "";
   manifest.forEach((entry, idx) => {
+    if (entry.character !== selectedChar) return;
     const btn = document.createElement("button");
     btn.className = "stage-btn";
-    btn.innerHTML = `<span class="char-tag">${entry.character} • Stage ${idx + 1}</span>${entry.name}`;
+    btn.innerHTML = `<span class="stage-num">Stage ${idx + 1}</span>${entry.name}`;
     btn.onclick = () => startStage(idx, false, true);
     ui.stageGrid.appendChild(btn);
   });
@@ -390,45 +405,6 @@ function renderFrame(hud, frameArray) {
 }
 
 function updateUi(hud) {
-  ui.score.textContent = hud.score.toLocaleString();
-  ui.lives.textContent = Math.max(0, hud.lives);
-  ui.growthFill.style.width = `${(hud.growth_progress * 100).toFixed(1)}%`;
-
-  if (hud.edible_icons) {
-    const key = hud.edible_icons.map((e) => `${e.image}:${e.hue}`).join("|");
-    if (ui.edibleTray.dataset.key !== key) {
-      ui.edibleTray.dataset.key = key;
-      ui.edibleTray.innerHTML = hud.edible_icons
-        .map(
-          (e) =>
-            `<img src="${e.image}" title="Can Eat: ${e.name}" style="filter:hue-rotate(${e.hue}deg)" />`
-        )
-        .join("");
-    }
-  }
-
-  ui.tierTicks.innerHTML = "";
-  for (const m of hud.tier_marks) {
-    const tick = document.createElement("div");
-    tick.className = "tier-tick";
-    tick.style.left = `${(m * 100).toFixed(1)}%`;
-    ui.tierTicks.appendChild(tick);
-  }
-
-  ui.frenzyFill.style.width = `${(hud.frenzy * 100).toFixed(1)}%`;
-  ui.frenzyLabel.textContent =
-    hud.frenzy_mult > 1 ? `FRENZY ${hud.frenzy_mult}X!` : "FRENZY 1X";
-
-  if (hud.timed_mode) {
-    ui.timeWrap.hidden = false;
-    const sec = Math.ceil(hud.time_remaining);
-    const m = Math.floor(sec / 60);
-    const s = String(sec % 60).padStart(2, "0");
-    ui.time.textContent = `${m}:${s}`;
-  } else {
-    ui.timeWrap.hidden = true;
-  }
-
   const buffs = [];
   if (hud.buffs.shield) buffs.push("🛡 SHIELD");
   if (hud.buffs.speed > 0) buffs.push(`⚡ SPEED ${hud.buffs.speed.toFixed(0)}s`);
