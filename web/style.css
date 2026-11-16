@@ -52,24 +52,24 @@ body {
 #app {
   position: relative;
   z-index: 1;
-  width: min(100vw, 133.333vh);
-  height: min(100vh, 75vw);
+  width: 100vw;
+  height: 100vh;
 }
 
 .stage-wrap {
   position: relative;
   width: 100%;
   height: 100%;
-  background: #02182b;
-  border-radius: 4px;
+  background: linear-gradient(180deg, #196da8 0%, #0b4978 55%, #052645 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  border: 1px solid rgba(130, 220, 255, 0.25);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.65);
 }
 
 #game-canvas {
-  width: 100%;
-  height: 100%;
+  width: min(100vw, 133.333vh);
+  height: min(100vh, 75vw);
   display: block;
   cursor: crosshair;
 }
@@ -174,16 +174,16 @@ body {
 .orig-bg {
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: cover;
   display: block;
 }
 
 .orig-logo {
   position: absolute;
   left: 50%;
-  top: 14%;
+  top: 13%;
   transform: translate(-50%, -50%);
-  width: 38%;
+  width: min(36%, 420px);
   height: auto;
   pointer-events: none;
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.65));
@@ -589,7 +589,7 @@ body {
 .map-bg {
   width: 100%;
   height: 100%;
-  object-fit: fill;
+  object-fit: cover;
   display: block;
 }
 
