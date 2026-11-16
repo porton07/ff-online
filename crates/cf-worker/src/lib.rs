@@ -40,10 +40,41 @@ fn collect_roster(state: &State) -> Vec<RosterEntry> {
         .collect()
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+struct RoomSummary {
+    code: String,
+    #[serde(rename = "hostName")]
+    host_name: String,
+    count: usize,
+}
+
+async fn notify_directory(env: &Env, code: &str, host_name: &str, count: usize) {
+    if code == "DIR0" {
+        return;
+    }
+    if let Ok(ns) = env.durable_object("COOP_ROOMS") {
+        if let Ok(id) = ns.id_from_name("DIR0") {
+            if let Ok(stub) = id.get_stub() {
+                let body = serde_json::json!({
+                    "code": code,
+                    "hostName": host_name,
+                    "count": count
+                })
+                .to_string();
+                let mut init = RequestInit::new();
+                init.with_method(Method::Post);
+                init.with_body(Some(body.into()));
+                if let Ok(req) = Request::new_with_init("https://dir/internal/dir", &init) {
+                    let _ = stub.fetch_with_request(req).await;
+                }
+            }
+        }
+    }
+}
+
 #[durable_object]
 pub struct CoopRoom {
     state: State,
-    #[allow(dead_code)]
     env: Env,
 }
 
@@ -52,8 +83,40 @@ impl DurableObject for CoopRoom {
         Self { state, env }
     }
 
-    async fn fetch(&self, req: Request) -> Result<Response> {
+    async fn fetch(&self, mut req: Request) -> Result<Response> {
         let url = req.url()?;
+        if url.path() == "/internal/dir" {
+            if req.method() == Method::Get {
+                let list: Vec<RoomSummary> = self
+                    .state
+                    .storage()
+                    .get("rooms")
+                    .await
+                    .ok()
+                    .flatten()
+                    .unwrap_or_default();
+                return Response::from_json(&list);
+            }
+            if req.method() == Method::Post {
+                let body = req.text().await.unwrap_or_default();
+                if let Ok(item) = serde_json::from_str::<RoomSummary>(&body) {
+                    let mut list: Vec<RoomSummary> = self
+                        .state
+                        .storage()
+                        .get("rooms")
+                        .await
+                        .ok()
+                        .flatten()
+                        .unwrap_or_default();
+                    list.retain(|r| r.code != item.code);
+                    if item.count > 0 {
+                        list.push(item);
+                    }
+                    let _ = self.state.storage().put("rooms", &list).await;
+                }
+                return Response::ok("ok");
+            }
+        }
         let mut role = "join".to_string();
         let mut code = "ROOM".to_string();
         for (k, v) in url.query_pairs() {
@@ -109,6 +172,11 @@ impl DurableObject for CoopRoom {
         let _ = server.send_with_str(&welcome.to_string());
 
         let roster = collect_roster(&self.state);
+        let host_name = roster
+            .first()
+            .map(|r| r.name.as_str())
+            .unwrap_or("Player 1");
+        notify_directory(&self.env, &code, host_name, roster.len()).await;
         let update = serde_json::json!({
             "type": "room_update",
             "code": code,
@@ -154,6 +222,11 @@ impl DurableObject for CoopRoom {
             }
             let _ = ws.serialize_attachment(&updated_meta);
             let roster = collect_roster(&self.state);
+            let host_name = roster
+                .first()
+                .map(|r| r.name.as_str())
+                .unwrap_or("Player 1");
+            notify_directory(&self.env, &meta.code, host_name, roster.len()).await;
             let update = serde_json::json!({
                 "type": "room_update",
                 "code": meta.code,
@@ -195,6 +268,7 @@ impl DurableObject for CoopRoom {
     ) -> Result<()> {
         if let Ok(Some(m)) = ws.deserialize_attachment::<PeerMeta>() {
             if m.is_host {
+                notify_directory(&self.env, &m.code, "", 0).await;
                 for peer in self.state.get_websockets() {
                     if let Ok(Some(pm)) = peer.deserialize_attachment::<PeerMeta>() {
                         if !pm.is_host {
@@ -247,6 +321,14 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     if path == "/api/create" {
         let code = gen_room_code();
         return Response::from_json(&serde_json::json!({ "code": code }));
+    }
+
+    if path == "/api/rooms" {
+        let ns = env.durable_object("COOP_ROOMS")?;
+        let id = ns.id_from_name("DIR0")?;
+        let stub = id.get_stub()?;
+        let dir_req = Request::new("https://dir/internal/dir", Method::Get)?;
+        return stub.fetch_with_request(dir_req).await;
     }
 
     if path == "/ws" {

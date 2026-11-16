@@ -5,6 +5,8 @@ const ui = {
   buffBar: document.getElementById("buff-bar"),
   stageBanner: document.getElementById("stage-banner"),
   ovTitle: document.getElementById("overlay-title"),
+  ovRooms: document.getElementById("overlay-rooms"),
+  roomsList: document.getElementById("rooms-list"),
   ovLobby: document.getElementById("overlay-lobby"),
   lobbyCode: document.getElementById("lobby-code"),
   lobbyNameInput: document.getElementById("lobby-name-input"),
@@ -512,7 +514,8 @@ function updateUi(hud) {
     "active",
     hud.state === "title" &&
       !ui.ovMap.classList.contains("active") &&
-      !ui.ovLobby.classList.contains("active")
+      !ui.ovLobby.classList.contains("active") &&
+      !ui.ovRooms.classList.contains("active")
   );
   ui.ovPause.classList.toggle("active", hud.state === "paused");
   ui.ovClear.classList.toggle("active", hud.state === "stage_clear");
@@ -665,6 +668,31 @@ function connectCoopWs(wsPath, onOpen) {
   };
 }
 
+async function loadRoomList() {
+  ui.roomsList.innerHTML = `<div class="room-empty">Loading rooms...</div>`;
+  try {
+    const r = await fetch("/api/rooms");
+    const list = await r.json();
+    if (!Array.isArray(list) || list.length === 0) {
+      ui.roomsList.innerHTML = `<div class="room-empty">No open rooms right now. Create one!</div>`;
+      return;
+    }
+    ui.roomsList.innerHTML = "";
+    list.forEach((rm) => {
+      const row = document.createElement("div");
+      row.className = "room-item";
+      row.innerHTML = `<div class="room-item-info"><strong>${rm.code}</strong><span>Host: ${rm.hostName} • ${rm.count}/4</span></div><button class="btn-gold-sm">Join</button>`;
+      row.querySelector("button").onclick = () => {
+        ui.ovRooms.classList.remove("active");
+        connectCoopWs(`/ws?code=${encodeURIComponent(rm.code)}&role=join`);
+      };
+      ui.roomsList.appendChild(row);
+    });
+  } catch {
+    ui.roomsList.innerHTML = `<div class="room-empty">Failed to load rooms.</div>`;
+  }
+}
+
 function setupInput() {
   canvas.addEventListener("mousemove", (e) => {
     const rect = canvas.getBoundingClientRect();
@@ -722,6 +750,16 @@ function setupInput() {
     } catch (err) {
       alert("Cannot create Co-Op room: " + err.message);
     }
+  };
+  document.getElementById("btn-coop-rooms").onclick = () => {
+    ui.ovTitle.classList.remove("active");
+    ui.ovRooms.classList.add("active");
+    loadRoomList();
+  };
+  document.getElementById("btn-rooms-refresh").onclick = () => loadRoomList();
+  document.getElementById("btn-rooms-close").onclick = () => {
+    ui.ovRooms.classList.remove("active");
+    ui.ovTitle.classList.add("active");
   };
   document.getElementById("btn-coop-join").onclick = () => {
     const code = ui.coopCodeInput.value.trim().toUpperCase();

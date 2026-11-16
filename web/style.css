@@ -287,6 +287,7 @@ body {
 }
 
 .orig-coop-bar #btn-coop-create,
+.orig-coop-bar #btn-coop-rooms,
 .orig-coop-bar #btn-coop-start {
   background: url("assets/resources/menus/genericbuttonnormal.png") no-repeat center / 100% 100%;
   border: none;
@@ -300,6 +301,7 @@ body {
 }
 
 .orig-coop-bar #btn-coop-create:hover,
+.orig-coop-bar #btn-coop-rooms:hover,
 .orig-coop-bar #btn-coop-start:hover {
   background-image: url("assets/resources/menus/genericbuttonhigh.png");
   filter: drop-shadow(0 3px 8px rgba(255, 220, 100, 0.55));
@@ -438,6 +440,41 @@ body {
   transform: translate(-50%, -50%) scale(1.45);
   background-image: url("assets/resources/menus/map/checkpointhigh.png");
   z-index: 4;
+}
+
+.rooms-shell {
+  width: min(520px, 92%);
+}
+
+.rooms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.room-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 14, 28, 0.72);
+  border: 1px solid rgba(125, 215, 255, 0.3);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.room-item-info strong {
+  color: #69f0ae;
+  letter-spacing: 2px;
+  margin-right: 10px;
+}
+
+.room-empty {
+  text-align: center;
+  padding: 24px;
+  color: #9ad8f8;
+  font-size: 0.88rem;
 }
 
 .lobby-bg-img {

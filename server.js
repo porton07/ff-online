@@ -127,6 +127,16 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({ code }));
     return;
   }
+  if (reqPath === "/api/rooms") {
+    const list = Array.from(rooms.values()).map((r) => ({
+      code: r.code,
+      hostName: r.clients[0]?.name || "Player 1",
+      count: r.clients.length,
+    }));
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify(list));
+    return;
+  }
   let filePath = path.join(WEB_DIR, reqPath === "/" ? "index.html" : reqPath);
   if (!filePath.startsWith(WEB_DIR)) {
     res.writeHead(403);

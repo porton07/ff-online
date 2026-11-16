@@ -57,6 +57,7 @@
               ONLINE CO-OP (2–4P)
             </span>
             <button id="btn-coop-create" class="btn-teal">Create Room</button>
+            <button id="btn-coop-rooms" class="btn-teal">Room List</button>
             <div class="coop-join">
               <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
               <button id="btn-coop-join" class="btn-aqua-sm">Join</button>
@@ -72,6 +73,21 @@
 
           <div class="orig-controls-hint">
             <b>Mouse / WASD</b> Swim • <b>Click / Space</b> Dash • <b>RMB / E</b> JD Suction • <b>Esc</b> Pause
+          </div>
+        </div>
+      </div>
+
+      <!-- Room List Overlay -->
+      <div id="overlay-rooms" class="overlay orig-menu-overlay">
+        <img class="lobby-bg-img" src="assets/resources/menus/mainbg.jpg" alt="" />
+        <div class="lobby-shell rooms-shell">
+          <div class="lobby-header">
+            <h2>OPEN CO-OP ROOMS</h2>
+            <button id="btn-rooms-refresh" class="btn-aqua-sm">Refresh</button>
+          </div>
+          <div id="rooms-list" class="rooms-list"></div>
+          <div class="lobby-actions">
+            <button id="btn-rooms-close" class="btn-aqua-sm">Back</button>
           </div>
         </div>
       </div>
