@@ -1,0 +1,40 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build WASM & Deploy Rust Worker
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust (wasm32-unknown-unknown)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            crates/game
+            crates/cf-worker
+
+      - name: Install worker-build
+        run: cargo install worker-build --locked
+
+      - name: Build Game WASM
+        run: |
+          cargo build --manifest-path crates/game/Cargo.toml --target wasm32-unknown-unknown --release
+          cp crates/game/target/wasm32-unknown-unknown/release/feeding_frenzy_wasm.wasm web/feeding_frenzy_wasm.wasm
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
