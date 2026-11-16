@@ -1,4 +1,7 @@
 assets_raw/
 crates/game/target/
+crates/cf-worker/target/
+crates/cf-worker/build/
+.wrangler/
 *.pdb
 .DS_Store

@@ -115,6 +115,12 @@ function broadcastRoom(room) {
 
 const server = http.createServer((req, res) => {
   const reqPath = decodeURIComponent((req.url || "/").split("?")[0]);
+  if (reqPath === "/api/create") {
+    const code = genCode();
+    res.writeHead(200, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ code }));
+    return;
+  }
   let filePath = path.join(WEB_DIR, reqPath === "/" ? "index.html" : reqPath);
   if (!filePath.startsWith(WEB_DIR)) {
     res.writeHead(403);
@@ -151,6 +157,38 @@ server.on("upgrade", (req, socket) => {
   );
 
   let clientInfo = { socket, room: null, playerIdx: 0, isHost: false };
+  const urlObj = new URL(req.url || "/ws", "http://localhost");
+  const qCode = (urlObj.searchParams.get("code") || "").trim().toUpperCase();
+  const qRole = urlObj.searchParams.get("role") || "";
+
+  if (qCode && qRole === "host") {
+    const room = rooms.get(qCode) || { code: qCode, host: clientInfo, clients: [] };
+    rooms.set(qCode, room);
+    clientInfo.room = room;
+    clientInfo.playerIdx = 0;
+    clientInfo.isHost = true;
+    room.clients.push(clientInfo);
+    socket.write(encodeWsText(JSON.stringify({ type: "created", code: qCode, playerIdx: 0 })));
+    broadcastRoom(room);
+  } else if (qCode && qRole === "join") {
+    const room = rooms.get(qCode);
+    if (!room) {
+      socket.write(encodeWsText(JSON.stringify({ type: "error", message: "Room not found" })));
+      socket.end();
+      return;
+    }
+    if (room.clients.length >= 4) {
+      socket.write(encodeWsText(JSON.stringify({ type: "error", message: "Room is full (max 4)" })));
+      socket.end();
+      return;
+    }
+    clientInfo.room = room;
+    clientInfo.playerIdx = room.clients.length;
+    clientInfo.isHost = false;
+    room.clients.push(clientInfo);
+    socket.write(encodeWsText(JSON.stringify({ type: "joined", code: qCode, playerIdx: clientInfo.playerIdx })));
+    broadcastRoom(room);
+  }
 
   attachWs(
     socket,

@@ -1,0 +1,18 @@
+name = "feeding-frenzy-online"
+main = "crates/cf-worker/build/worker/shim.mjs"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "web"
+binding = "ASSETS"
+
+[build]
+command = "cd crates/cf-worker && worker-build --release"
+
+[[durable_objects.bindings]]
+name = "COOP_ROOMS"
+class_name = "CoopRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CoopRoom"]

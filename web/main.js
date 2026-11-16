@@ -522,11 +522,11 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
-function connectCoopWs(onOpen) {
+function connectCoopWs(wsPath, onOpen) {
   const proto = location.protocol === "https:" ? "wss:" : "ws:";
-  const ws = new WebSocket(`${proto}//${location.host}/ws`);
+  const ws = new WebSocket(`${proto}//${location.host}${wsPath}`);
   coop.ws = ws;
-  ws.onopen = onOpen;
+  if (onOpen) ws.onopen = onOpen;
   ws.onmessage = (ev) => {
     const msg = JSON.parse(ev.data);
     if (msg.type === "created") {
@@ -624,13 +624,15 @@ function setupInput() {
 
   document.getElementById("btn-play-story").onclick = () => startStage(0, false, true);
   document.getElementById("btn-play-timed").onclick = () => startStage(0, true, true);
-  document.getElementById("btn-coop-create").onclick = () => {
-    connectCoopWs(() => coop.ws.send(JSON.stringify({ type: "create" })));
+  document.getElementById("btn-coop-create").onclick = async () => {
+    const r = await fetch("/api/create");
+    const { code } = await r.json();
+    connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=host`);
   };
   document.getElementById("btn-coop-join").onclick = () => {
     const code = ui.coopCodeInput.value.trim().toUpperCase();
     if (!code) return;
-    connectCoopWs(() => coop.ws.send(JSON.stringify({ type: "join", code })));
+    connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=join`);
   };
   document.getElementById("btn-coop-start").onclick = () => startStage(0, false, true);
   document.getElementById("btn-resume").onclick = () => wasm.toggle_pause();

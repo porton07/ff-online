@@ -2,7 +2,15 @@
 
 A Rust + WebAssembly web port of **Feeding Frenzy** with all 40 original stages, 5 playable fish (Andy, Leon, Eddie, JD, Orville), original sprites/audio, and **Online Co-Op (2–4 players)** with player-vs-player eating.
 
-## Run Locally
+## Deploy to Cloudflare Workers (Free Plan — Rust Worker + Durable Objects + Static Assets)
+
+```bash
+cargo install worker-build
+npx wrangler login
+npx wrangler deploy
+```
+
+## Run Locally (Node.js)
 
 ```bash
 node server.js
