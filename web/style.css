@@ -439,6 +439,141 @@ body {
   z-index: 4;
 }
 
+.lobby-shell {
+  width: min(640px, 94%);
+  background: linear-gradient(180deg, rgba(8, 42, 76, 0.94), rgba(3, 18, 36, 0.97));
+  border: 2px solid rgba(130, 225, 255, 0.45);
+  border-radius: 18px;
+  padding: 18px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 20px 54px rgba(0, 0, 0, 0.7);
+}
+
+.lobby-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lobby-header h2 {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: #ffe066;
+}
+
+.lobby-code-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 14, 30, 0.75);
+  border: 1px solid rgba(130, 225, 255, 0.4);
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.lobby-code-pill strong {
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  color: #69f0ae;
+}
+
+.lobby-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lobby-fish-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.fish-pick-card {
+  background: rgba(5, 26, 48, 0.85);
+  border: 2px solid rgba(120, 210, 255, 0.28);
+  border-radius: 12px;
+  padding: 8px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: #e6f6ff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  transition: transform 0.1s ease, border-color 0.12s ease, background 0.12s ease;
+}
+
+.fish-pick-card:hover {
+  transform: translateY(-2px);
+  border-color: #7ee8fa;
+}
+
+.fish-pick-card.selected {
+  background: rgba(20, 82, 130, 0.95);
+  border-color: #ffe066;
+  box-shadow: 0 0 14px rgba(255, 224, 102, 0.4);
+}
+
+.fish-pick-card img {
+  width: 58px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.fish-pick-card span.sub {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #9ad8f8;
+}
+
+.lobby-roster {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.roster-slot {
+  background: rgba(0, 14, 28, 0.72);
+  border: 1px solid rgba(120, 210, 255, 0.24);
+  border-radius: 10px;
+  padding: 8px;
+  text-align: center;
+  font-size: 0.76rem;
+  color: #8ab8d0;
+}
+
+.roster-slot.filled {
+  border-color: #69f0ae;
+  color: #fff;
+}
+
+.roster-slot strong {
+  display: block;
+  font-size: 0.78rem;
+  color: #ffe066;
+}
+
+.lobby-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.lobby-wait-msg {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #9ad8f8;
+}
+
 .map-overlay {
   padding: 0;
   background: #02182b;

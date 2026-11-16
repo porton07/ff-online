@@ -6,6 +6,22 @@ struct PeerMeta {
     player_idx: usize,
     is_host: bool,
     code: String,
+    fish_idx: usize,
+}
+
+fn collect_roster(state: &State) -> Vec<usize> {
+    let mut items: Vec<(usize, usize)> = state
+        .get_websockets()
+        .into_iter()
+        .filter_map(|ws| {
+            ws.deserialize_attachment::<PeerMeta>()
+                .ok()
+                .flatten()
+                .map(|m| (m.player_idx, m.fish_idx))
+        })
+        .collect();
+    items.sort_by_key(|x| x.0);
+    items.into_iter().map(|x| x.1).collect()
 }
 
 #[durable_object]
@@ -64,6 +80,7 @@ impl DurableObject for CoopRoom {
             player_idx,
             is_host,
             code: code.clone(),
+            fish_idx: player_idx % 5,
         };
         let _ = server.serialize_attachment(&meta);
 
@@ -74,11 +91,12 @@ impl DurableObject for CoopRoom {
         };
         let _ = server.send_with_str(&welcome.to_string());
 
-        let count = self.state.get_websockets().len();
+        let roster = collect_roster(&self.state);
         let update = serde_json::json!({
             "type": "room_update",
             "code": code,
-            "playerCount": count
+            "playerCount": roster.len(),
+            "roster": roster
         })
         .to_string();
         for ws in self.state.get_websockets() {
@@ -104,7 +122,23 @@ impl DurableObject for CoopRoom {
         };
 
         let msg_type = val.get("type").and_then(|v| v.as_str()).unwrap_or("");
-        if msg_type == "input" && !meta.is_host {
+        if msg_type == "pick_fish" {
+            let fi = val.get("fishIdx").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
+            let mut updated_meta = meta.clone();
+            updated_meta.fish_idx = fi.min(4);
+            let _ = ws.serialize_attachment(&updated_meta);
+            let roster = collect_roster(&self.state);
+            let update = serde_json::json!({
+                "type": "room_update",
+                "code": meta.code,
+                "playerCount": roster.len(),
+                "roster": roster
+            })
+            .to_string();
+            for peer in self.state.get_websockets() {
+                let _ = peer.send_with_str(&update);
+            }
+        } else if msg_type == "input" && !meta.is_host {
             val["playerIdx"] = serde_json::json!(meta.player_idx);
             let out = val.to_string();
             for peer in self.state.get_websockets() {

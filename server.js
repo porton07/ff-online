@@ -102,10 +102,12 @@ function genCode() {
 }
 
 function broadcastRoom(room) {
+  const roster = room.clients.map((c) => c.fishIdx || 0);
   const summary = JSON.stringify({
     type: "room_update",
     code: room.code,
     playerCount: room.clients.length,
+    roster,
   });
   const pkt = encodeWsText(summary);
   for (const c of room.clients) {
@@ -167,6 +169,7 @@ server.on("upgrade", (req, socket) => {
     clientInfo.room = room;
     clientInfo.playerIdx = 0;
     clientInfo.isHost = true;
+    clientInfo.fishIdx = 0;
     room.clients.push(clientInfo);
     socket.write(encodeWsText(JSON.stringify({ type: "created", code: qCode, playerIdx: 0 })));
     broadcastRoom(room);
@@ -185,6 +188,7 @@ server.on("upgrade", (req, socket) => {
     clientInfo.room = room;
     clientInfo.playerIdx = room.clients.length;
     clientInfo.isHost = false;
+    clientInfo.fishIdx = clientInfo.playerIdx % 5;
     room.clients.push(clientInfo);
     socket.write(encodeWsText(JSON.stringify({ type: "joined", code: qCode, playerIdx: clientInfo.playerIdx })));
     broadcastRoom(room);
@@ -200,7 +204,10 @@ server.on("upgrade", (req, socket) => {
         return;
       }
 
-      if (msg.type === "create") {
+      if (msg.type === "pick_fish" && clientInfo.room) {
+        clientInfo.fishIdx = Math.max(0, Math.min(4, Number(msg.fishIdx) || 0));
+        broadcastRoom(clientInfo.room);
+      } else if (msg.type === "create") {
         const code = genCode();
         const room = { code, host: clientInfo, clients: [clientInfo] };
         rooms.set(code, room);

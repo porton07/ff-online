@@ -47,6 +47,11 @@ pub extern "C" fn start_coop_stage(
 }
 
 #[no_mangle]
+pub extern "C" fn set_player_fish(player_idx: u32, fish_idx: u32) {
+    with_engine(|e| e.set_player_fish(player_idx as usize, fish_idx as usize));
+}
+
+#[no_mangle]
 pub extern "C" fn set_input(
     mouse_x: f32,
     mouse_y: f32,

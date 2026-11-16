@@ -293,6 +293,7 @@ pub struct Engine {
     pub stage_clear_timer: f32,
     pub next_school_id: u32,
     pub team_food_progress: f32,
+    pub coop_fish_picks: [Option<usize>; 4],
 
     pub players: Vec<Player>,
     pub inputs: Vec<InputState>,
@@ -336,6 +337,7 @@ impl Engine {
             stage_clear_timer: 0.0,
             next_school_id: 1,
             team_food_progress: 0.0,
+            coop_fish_picks: [None; 4],
             players: vec![Player::new_at(400.0, 300.0, 1.5, 0.4, String::new(), 3, 0.0)],
             inputs: vec![InputState {
                 mouse_x: 400.0,
@@ -422,12 +424,29 @@ impl Engine {
             } else {
                 *old_lives.get(i).unwrap_or(&3)
             };
+            let cfg_for_p = if pcount > 1 {
+                let fish_keys = [
+                    "config/fish/angelplayer.xml",
+                    "config/fish/lionplayer.xml",
+                    "config/fish/anglerplayer.xml",
+                    "config/fish/jdplayer.xml",
+                    "config/fish/orcaplayer.xml",
+                ];
+                self.coop_fish_picks
+                    .get(i)
+                    .and_then(|opt| *opt)
+                    .and_then(|fi| fish_keys.get(fi))
+                    .map(|s| s.to_string())
+                    .unwrap_or_else(|| pcfg_key.clone())
+            } else {
+                pcfg_key.clone()
+            };
             self.players.push(Player::new_at(
                 px,
                 py,
                 first_size,
                 first_scale,
-                pcfg_key.clone(),
+                cfg_for_p,
                 lives,
                 hues[i],
             ));
@@ -459,6 +478,12 @@ impl Engine {
         let count = self.spawners.len();
         for i in 0..count {
             self.try_spawn_for_spawner(i, true);
+        }
+    }
+
+    pub fn set_player_fish(&mut self, player_idx: usize, fish_idx: usize) {
+        if player_idx < 4 && fish_idx < 5 {
+            self.coop_fish_picks[player_idx] = Some(fish_idx);
         }
     }
 

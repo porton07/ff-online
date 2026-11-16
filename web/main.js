@@ -5,6 +5,13 @@ const ui = {
   buffBar: document.getElementById("buff-bar"),
   stageBanner: document.getElementById("stage-banner"),
   ovTitle: document.getElementById("overlay-title"),
+  ovLobby: document.getElementById("overlay-lobby"),
+  lobbyCode: document.getElementById("lobby-code"),
+  lobbyFishGrid: document.getElementById("lobby-fish-grid"),
+  lobbyRoster: document.getElementById("lobby-roster"),
+  btnLobbyMap: document.getElementById("btn-lobby-map"),
+  btnLobbyStart: document.getElementById("btn-lobby-start"),
+  lobbyWaitMsg: document.getElementById("lobby-wait-msg"),
   ovMap: document.getElementById("overlay-map"),
   mapNodes: document.getElementById("map-nodes"),
   mapTrail: document.getElementById("map-trail"),
@@ -32,7 +39,58 @@ let coop = {
   playerCount: 1,
   code: "",
   netTick: 0,
+  myFishIdx: 0,
+  roster: [0],
 };
+
+const PLAYABLE_FISH = [
+  { name: "Andy", sub: "Angelfish", img: "assets/resources/menus/map/mapangelbtn_normal.png" },
+  { name: "Leon", sub: "Lionfish", img: "assets/resources/menus/map/maplionbtn_normal.png" },
+  { name: "Eddie", sub: "Angler", img: "assets/resources/menus/map/mapanglerbtn_normal.png" },
+  { name: "J.D.", sub: "Suction", img: "assets/resources/menus/map/mapjdbtn_normal.png" },
+  { name: "Orville", sub: "Orca", img: "assets/resources/menus/map/maporcabtn_normal.png" },
+];
+
+function renderLobby() {
+  ui.lobbyCode.textContent = coop.code || "----";
+  ui.btnLobbyMap.hidden = !coop.isHost;
+  ui.btnLobbyStart.hidden = !coop.isHost;
+  ui.lobbyWaitMsg.hidden = coop.isHost;
+
+  ui.lobbyFishGrid.innerHTML = "";
+  PLAYABLE_FISH.forEach((f, idx) => {
+    const btn = document.createElement("button");
+    btn.className = "fish-pick-card" + (coop.myFishIdx === idx ? " selected" : "");
+    btn.innerHTML = `<img src="${f.img}" alt="${f.name}" /><span>${f.name}</span><span class="sub">${f.sub}</span>`;
+    btn.onclick = () => {
+      coop.myFishIdx = idx;
+      if (coop.isHost) {
+        wasm.set_player_fish(0, idx);
+      }
+      if (coop.ws && coop.ws.readyState === 1) {
+        coop.ws.send(JSON.stringify({ type: "pick_fish", fishIdx: idx }));
+      }
+      renderLobby();
+    };
+    ui.lobbyFishGrid.appendChild(btn);
+  });
+
+  ui.lobbyRoster.innerHTML = "";
+  for (let i = 0; i < 4; i++) {
+    const slot = document.createElement("div");
+    if (i < coop.playerCount) {
+      const fi = coop.roster[i] ?? (i % 5);
+      const fishName = PLAYABLE_FISH[fi]?.name || "Andy";
+      const you = i === coop.playerIdx ? " (You)" : "";
+      slot.className = "roster-slot filled";
+      slot.innerHTML = `<strong>P${i + 1}${you}</strong>${fishName}`;
+    } else {
+      slot.className = "roster-slot";
+      slot.innerHTML = `<strong>P${i + 1}</strong>Empty`;
+    }
+    ui.lobbyRoster.appendChild(slot);
+  }
+}
 
 let wasm = null;
 let images = [];
@@ -162,7 +220,11 @@ function buildStageGrid() {
 }
 
 function startStage(idx, timedMode, resetRun) {
+  ui.ovLobby.classList.remove("active");
   if (coop.active && coop.isHost) {
+    coop.roster.forEach((fi, pIdx) => {
+      wasm.set_player_fish(pIdx, fi);
+    });
     wasm.start_coop_stage(idx, timedMode ? 1 : 0, resetRun ? 1 : 0, coop.playerCount);
     if (coop.ws && coop.ws.readyState === 1) {
       coop.ws.send(JSON.stringify({ type: "start_coop", stageIdx: idx }));
@@ -441,7 +503,12 @@ function updateUi(hud) {
       ? ""
       : `${hud.character} • Stage ${hud.stage_idx + 1}/${hud.stage_count}: ${hud.stage_name}`;
 
-  ui.ovTitle.classList.toggle("active", hud.state === "title" && !ui.ovMap.classList.contains("active"));
+  ui.ovTitle.classList.toggle(
+    "active",
+    hud.state === "title" &&
+      !ui.ovMap.classList.contains("active") &&
+      !ui.ovLobby.classList.contains("active")
+  );
   ui.ovPause.classList.toggle("active", hud.state === "paused");
   ui.ovClear.classList.toggle("active", hud.state === "stage_clear");
   ui.ovGameOver.classList.toggle(
@@ -532,21 +599,32 @@ function connectCoopWs(wsPath, onOpen) {
       coop.isHost = true;
       coop.playerIdx = 0;
       coop.code = msg.code;
-      ui.coopLobby.hidden = false;
-      ui.btnCoopStart.hidden = false;
-      ui.coopStatus.textContent = `Room: ${msg.code} • Players: 1/4 (You are P1 Host)`;
+      coop.myFishIdx = 0;
+      coop.roster = [0];
+      ui.ovTitle.classList.remove("active");
+      ui.ovLobby.classList.add("active");
+      renderLobby();
     } else if (msg.type === "joined") {
       coop.active = true;
       coop.isHost = false;
       coop.playerIdx = msg.playerIdx;
       coop.code = msg.code;
-      ui.coopLobby.hidden = false;
-      ui.btnCoopStart.hidden = true;
-      ui.coopStatus.textContent = `Joined ${msg.code} as P${msg.playerIdx + 1} • Waiting for Host...`;
+      coop.myFishIdx = msg.playerIdx % 5;
+      ui.ovTitle.classList.remove("active");
+      ui.ovLobby.classList.add("active");
+      renderLobby();
     } else if (msg.type === "room_update") {
       coop.playerCount = msg.playerCount;
-      const role = coop.isHost ? "Host" : `P${coop.playerIdx + 1}`;
-      ui.coopStatus.textContent = `Room: ${msg.code} • Players: ${msg.playerCount}/4 (${role})`;
+      if (Array.isArray(msg.roster)) {
+        coop.roster = msg.roster;
+        if (coop.isHost) {
+          coop.roster.forEach((fi, pIdx) => wasm.set_player_fish(pIdx, fi));
+        }
+      }
+      renderLobby();
+    } else if (msg.type === "start_coop" && !coop.isHost) {
+      ui.ovLobby.classList.remove("active");
+      ui.ovMap.classList.remove("active");
     } else if (msg.type === "input" && coop.isHost) {
       wasm.set_player_input(
         msg.playerIdx,
@@ -634,6 +712,15 @@ function setupInput() {
     connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=join`);
   };
   document.getElementById("btn-coop-start").onclick = () => openStoryMap();
+  document.getElementById("btn-lobby-map").onclick = () => {
+    ui.ovLobby.classList.remove("active");
+    openStoryMap();
+  };
+  document.getElementById("btn-lobby-start").onclick = () => startStage(0, false, true);
+  document.getElementById("btn-lobby-leave").onclick = () => location.reload();
+  document.getElementById("btn-copy-code").onclick = () => {
+    navigator.clipboard?.writeText(coop.code);
+  };
   document.getElementById("btn-resume").onclick = () => wasm.toggle_pause();
   document.getElementById("btn-restart-stage").onclick = () => {
     if (lastHud) startStage(lastHud.stage_idx, lastHud.timed_mode, false);

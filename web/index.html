@@ -76,6 +76,37 @@
         </div>
       </div>
 
+      <!-- Co-Op Lobby Overlay -->
+      <div id="overlay-lobby" class="overlay orig-menu-overlay">
+        <div class="lobby-shell">
+          <div class="lobby-header">
+            <h2>ONLINE CO-OP LOBBY</h2>
+            <div class="lobby-code-pill">
+              <span>ROOM CODE:</span>
+              <strong id="lobby-code">----</strong>
+              <button id="btn-copy-code" class="btn-aqua-sm" title="Copy Room Code">Copy</button>
+            </div>
+          </div>
+
+          <div class="lobby-section">
+            <div class="section-title">CHOOSE YOUR FISH</div>
+            <div id="lobby-fish-grid" class="lobby-fish-grid"></div>
+          </div>
+
+          <div class="lobby-section">
+            <div class="section-title">PLAYERS IN ROOM</div>
+            <div id="lobby-roster" class="lobby-roster"></div>
+          </div>
+
+          <div class="lobby-actions">
+            <button id="btn-lobby-leave" class="btn-aqua-sm">Leave Room</button>
+            <span id="lobby-wait-msg" class="lobby-wait-msg" hidden>Waiting for Host to start...</span>
+            <button id="btn-lobby-map" class="btn-gold-sm" hidden>Choose Stage on Map</button>
+            <button id="btn-lobby-start" class="btn-gold-sm" hidden>Start Stage 1</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Story Mode Map Overlay (Authentic Map Layout) -->
       <div id="overlay-map" class="overlay map-overlay">
         <div class="map-container">
