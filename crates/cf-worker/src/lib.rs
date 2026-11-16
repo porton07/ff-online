@@ -7,21 +7,37 @@ struct PeerMeta {
     is_host: bool,
     code: String,
     fish_idx: usize,
+    name: String,
 }
 
-fn collect_roster(state: &State) -> Vec<usize> {
-    let mut items: Vec<(usize, usize)> = state
+#[derive(Serialize)]
+struct RosterEntry {
+    #[serde(rename = "playerIdx")]
+    player_idx: usize,
+    #[serde(rename = "fishIdx")]
+    fish_idx: usize,
+    name: String,
+}
+
+fn collect_roster(state: &State) -> Vec<RosterEntry> {
+    let mut items: Vec<PeerMeta> = state
         .get_websockets()
         .into_iter()
-        .filter_map(|ws| {
-            ws.deserialize_attachment::<PeerMeta>()
-                .ok()
-                .flatten()
-                .map(|m| (m.player_idx, m.fish_idx))
-        })
+        .filter_map(|ws| ws.deserialize_attachment::<PeerMeta>().ok().flatten())
         .collect();
-    items.sort_by_key(|x| x.0);
-    items.into_iter().map(|x| x.1).collect()
+    items.sort_by_key(|m| m.player_idx);
+    items
+        .into_iter()
+        .map(|m| RosterEntry {
+            player_idx: m.player_idx,
+            fish_idx: m.fish_idx,
+            name: if m.name.is_empty() {
+                format!("Player {}", m.player_idx + 1)
+            } else {
+                m.name
+            },
+        })
+        .collect()
 }
 
 #[durable_object]
@@ -81,6 +97,7 @@ impl DurableObject for CoopRoom {
             is_host,
             code: code.clone(),
             fish_idx: player_idx % 5,
+            name: format!("Player {}", player_idx + 1),
         };
         let _ = server.serialize_attachment(&meta);
 
@@ -122,10 +139,19 @@ impl DurableObject for CoopRoom {
         };
 
         let msg_type = val.get("type").and_then(|v| v.as_str()).unwrap_or("");
-        if msg_type == "pick_fish" {
-            let fi = val.get("fishIdx").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
+        if msg_type == "pick_fish" || msg_type == "set_name" {
             let mut updated_meta = meta.clone();
-            updated_meta.fish_idx = fi.min(4);
+            if msg_type == "pick_fish" {
+                let fi = val.get("fishIdx").and_then(|v| v.as_u64()).unwrap_or(0) as usize;
+                updated_meta.fish_idx = fi.min(4);
+            } else if let Some(nm) = val.get("name").and_then(|v| v.as_str()) {
+                let trimmed: String = nm.trim().chars().take(12).collect();
+                updated_meta.name = if trimmed.is_empty() {
+                    format!("Player {}", meta.player_idx + 1)
+                } else {
+                    trimmed
+                };
+            }
             let _ = ws.serialize_attachment(&updated_meta);
             let roster = collect_roster(&self.state);
             let update = serde_json::json!({

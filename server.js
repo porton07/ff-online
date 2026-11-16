@@ -102,7 +102,11 @@ function genCode() {
 }
 
 function broadcastRoom(room) {
-  const roster = room.clients.map((c) => c.fishIdx || 0);
+  const roster = room.clients.map((c, idx) => ({
+    playerIdx: idx,
+    fishIdx: c.fishIdx || 0,
+    name: c.name || `Player ${idx + 1}`,
+  }));
   const summary = JSON.stringify({
     type: "room_update",
     code: room.code,
@@ -206,6 +210,10 @@ server.on("upgrade", (req, socket) => {
 
       if (msg.type === "pick_fish" && clientInfo.room) {
         clientInfo.fishIdx = Math.max(0, Math.min(4, Number(msg.fishIdx) || 0));
+        broadcastRoom(clientInfo.room);
+      } else if (msg.type === "set_name" && clientInfo.room) {
+        const clean = String(msg.name || "").trim().slice(0, 12);
+        clientInfo.name = clean || `Player ${clientInfo.playerIdx + 1}`;
         broadcastRoom(clientInfo.room);
       } else if (msg.type === "create") {
         const code = genCode();

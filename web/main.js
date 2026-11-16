@@ -7,6 +7,7 @@ const ui = {
   ovTitle: document.getElementById("overlay-title"),
   ovLobby: document.getElementById("overlay-lobby"),
   lobbyCode: document.getElementById("lobby-code"),
+  lobbyNameInput: document.getElementById("lobby-name-input"),
   lobbyFishGrid: document.getElementById("lobby-fish-grid"),
   lobbyRoster: document.getElementById("lobby-roster"),
   btnLobbyMap: document.getElementById("btn-lobby-map"),
@@ -40,7 +41,8 @@ let coop = {
   code: "",
   netTick: 0,
   myFishIdx: 0,
-  roster: [0],
+  myName: localStorage.getItem("ff_name") || "",
+  roster: [{ playerIdx: 0, fishIdx: 0, name: "Player 1" }],
 };
 
 const PLAYABLE_FISH = [
@@ -79,14 +81,16 @@ function renderLobby() {
   for (let i = 0; i < 4; i++) {
     const slot = document.createElement("div");
     if (i < coop.playerCount) {
-      const fi = coop.roster[i] ?? (i % 5);
-      const fishName = PLAYABLE_FISH[fi]?.name || "Andy";
+      const entry = coop.roster[i] || { fishIdx: i % 5, name: `Player ${i + 1}` };
+      const fi = entry.fishIdx ?? (i % 5);
+      const fish = PLAYABLE_FISH[fi] || PLAYABLE_FISH[0];
+      const pName = entry.name || `Player ${i + 1}`;
       const you = i === coop.playerIdx ? " (You)" : "";
       slot.className = "roster-slot filled";
-      slot.innerHTML = `<strong>P${i + 1}${you}</strong>${fishName}`;
+      slot.innerHTML = `<img src="${fish.img}" alt="${fish.name}" /><strong>${pName}${you}</strong><span class="fish-label">P${i + 1} • ${fish.name}</span>`;
     } else {
       slot.className = "roster-slot";
-      slot.innerHTML = `<strong>P${i + 1}</strong>Empty`;
+      slot.innerHTML = `<strong>P${i + 1}</strong><span class="fish-label">Waiting...</span>`;
     }
     ui.lobbyRoster.appendChild(slot);
   }
@@ -222,7 +226,8 @@ function buildStageGrid() {
 function startStage(idx, timedMode, resetRun) {
   ui.ovLobby.classList.remove("active");
   if (coop.active && coop.isHost) {
-    coop.roster.forEach((fi, pIdx) => {
+    coop.roster.forEach((entry, pIdx) => {
+      const fi = typeof entry === "number" ? entry : (entry.fishIdx ?? 0);
       wasm.set_player_fish(pIdx, fi);
     });
     wasm.start_coop_stage(idx, timedMode ? 1 : 0, resetRun ? 1 : 0, coop.playerCount);
@@ -456,20 +461,21 @@ function renderFrame(hud, frameArray) {
     }
   }
 
-  // Co-Op Player Tags (P1..P4)
+  // Co-Op Player Tags (Nickname or P1..P4)
   if (hud.player_tags) {
-    for (const t of hud.player_tags) {
-      if (!t.alive) continue;
+    hud.player_tags.forEach((t, idx) => {
+      if (!t.alive) return;
+      const customName = coop.roster[idx]?.name || t.label;
       ctx.save();
       ctx.font = '900 13px "Segoe UI", sans-serif';
       ctx.textAlign = "center";
       ctx.lineWidth = 3;
       ctx.strokeStyle = "rgba(0,0,0,0.85)";
-      ctx.strokeText(t.label, t.x, t.y);
+      ctx.strokeText(customName, t.x, t.y);
       ctx.fillStyle = t.color;
-      ctx.fillText(t.label, t.x, t.y);
+      ctx.fillText(customName, t.x, t.y);
       ctx.restore();
-    }
+    });
   }
 
   // Floating popups
@@ -600,7 +606,9 @@ function connectCoopWs(wsPath, onOpen) {
       coop.playerIdx = 0;
       coop.code = msg.code;
       coop.myFishIdx = 0;
-      coop.roster = [0];
+      coop.roster = [{ playerIdx: 0, fishIdx: 0, name: coop.myName || "Player 1" }];
+      ui.lobbyNameInput.value = coop.myName;
+      if (coop.myName) ws.send(JSON.stringify({ type: "set_name", name: coop.myName }));
       ui.ovTitle.classList.remove("active");
       ui.ovLobby.classList.add("active");
       renderLobby();
@@ -610,6 +618,8 @@ function connectCoopWs(wsPath, onOpen) {
       coop.playerIdx = msg.playerIdx;
       coop.code = msg.code;
       coop.myFishIdx = msg.playerIdx % 5;
+      ui.lobbyNameInput.value = coop.myName;
+      if (coop.myName) ws.send(JSON.stringify({ type: "set_name", name: coop.myName }));
       ui.ovTitle.classList.remove("active");
       ui.ovLobby.classList.add("active");
       renderLobby();
@@ -618,7 +628,10 @@ function connectCoopWs(wsPath, onOpen) {
       if (Array.isArray(msg.roster)) {
         coop.roster = msg.roster;
         if (coop.isHost) {
-          coop.roster.forEach((fi, pIdx) => wasm.set_player_fish(pIdx, fi));
+          coop.roster.forEach((entry, pIdx) => {
+            const fi = typeof entry === "number" ? entry : (entry.fishIdx ?? 0);
+            wasm.set_player_fish(pIdx, fi);
+          });
         }
       }
       renderLobby();
@@ -723,6 +736,13 @@ function setupInput() {
   };
   document.getElementById("btn-lobby-start").onclick = () => startStage(0, false, true);
   document.getElementById("btn-lobby-leave").onclick = () => location.reload();
+  ui.lobbyNameInput.addEventListener("input", () => {
+    coop.myName = ui.lobbyNameInput.value.trim().slice(0, 12);
+    localStorage.setItem("ff_name", coop.myName);
+    if (coop.ws && coop.ws.readyState === 1) {
+      coop.ws.send(JSON.stringify({ type: "set_name", name: coop.myName }));
+    }
+  });
   document.getElementById("btn-copy-code").onclick = () => {
     navigator.clipboard?.writeText(coop.code);
   };

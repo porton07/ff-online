@@ -78,9 +78,16 @@
 
       <!-- Co-Op Lobby Overlay -->
       <div id="overlay-lobby" class="overlay orig-menu-overlay">
+        <img class="lobby-bg-img" src="assets/resources/menus/mainbg.jpg" alt="" />
         <div class="lobby-shell">
           <div class="lobby-header">
-            <h2>ONLINE CO-OP LOBBY</h2>
+            <div class="lobby-title-group">
+              <h2>ONLINE CO-OP LOBBY</h2>
+              <div class="lobby-name-wrap">
+                <label for="lobby-name-input">YOUR NAME</label>
+                <input id="lobby-name-input" type="text" maxlength="12" placeholder="Player" />
+              </div>
+            </div>
             <div class="lobby-code-pill">
               <span>ROOM CODE:</span>
               <strong id="lobby-code">----</strong>
@@ -101,8 +108,10 @@
           <div class="lobby-actions">
             <button id="btn-lobby-leave" class="btn-aqua-sm">Leave Room</button>
             <span id="lobby-wait-msg" class="lobby-wait-msg" hidden>Waiting for Host to start...</span>
-            <button id="btn-lobby-map" class="btn-gold-sm" hidden>Choose Stage on Map</button>
-            <button id="btn-lobby-start" class="btn-gold-sm" hidden>Start Stage 1</button>
+            <div class="lobby-host-btns">
+              <button id="btn-lobby-map" class="btn-gold-sm" hidden>Choose Stage on Map</button>
+              <button id="btn-lobby-start" class="btn-gold-sm" hidden>Start Stage 1</button>
+            </div>
           </div>
         </div>
       </div>
