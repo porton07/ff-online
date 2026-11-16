@@ -28,36 +28,28 @@
       <div id="buff-bar" class="buff-bar"></div>
       <div id="stage-banner" class="stage-banner"></div>
 
-      <!-- Title Overlay -->
-      <div id="overlay-title" class="overlay active">
-        <div class="menu-shell-single">
-          <div class="hero-section">
-            <h1 class="game-logo">FEEDING FRENZY</h1>
-            <p class="hero-sub">40 Stages • 5 Playable Fish • Online Co-Op</p>
+      <!-- Title Overlay (Authentic Main Menu) -->
+      <div id="overlay-title" class="overlay active orig-menu-overlay">
+        <div class="orig-menu-stage">
+          <img class="orig-bg" src="assets/resources/menus/mainbg.jpg" alt="Main Menu" />
+          <img class="orig-logo" src="assets/resources/menus/logo.png" alt="Feeding Frenzy" />
+
+          <button id="btn-play-story" class="orig-img-btn btn-new-game" title="Story Mode (Map)"></button>
+          <button id="btn-play-timed" class="orig-img-btn btn-time-game" title="Time Attack"></button>
+
+          <div class="orig-helper orig-helper-story">
+            Explore the ocean &amp; eat your way to the top of the food chain!
+          </div>
+          <div class="orig-helper orig-helper-time">
+            See how far you can last before the Time Attack Clock runs out!
           </div>
 
-          <div class="menu-card main-card">
-            <div class="section-title">🎮 PLAY</div>
-            <div class="solo-actions">
-              <button id="btn-play-story" class="btn-gold">
-                <span class="btn-main">▶ Story Mode</span>
-                <span class="btn-desc">Explore the Ocean Map &amp; choose any of 40 stages</span>
-              </button>
-              <button id="btn-play-timed" class="btn-aqua">
-                <span class="btn-main">⏱ Time Attack</span>
-                <span class="btn-desc">Beat the clock for high score</span>
-              </button>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="section-title">🌐 ONLINE CO-OP (2–4 PLAYERS)</div>
-            <div class="coop-panel">
-              <button id="btn-coop-create" class="btn-teal">Create Room</button>
-              <div class="coop-join">
-                <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
-                <button id="btn-coop-join" class="btn-aqua-sm">Join</button>
-              </div>
+          <div class="orig-coop-bar">
+            <span class="orig-coop-title">🌐 ONLINE CO-OP (2–4P)</span>
+            <button id="btn-coop-create" class="btn-teal">Create Room</button>
+            <div class="coop-join">
+              <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
+              <button id="btn-coop-join" class="btn-aqua-sm">Join</button>
             </div>
             <div id="coop-lobby" class="coop-lobby" hidden>
               <span id="coop-status"></span>
@@ -65,25 +57,29 @@
             </div>
           </div>
 
-          <div class="controls-footer">
-            <span><b>Mouse</b> / <b>WASD</b> Swim</span>
-            <span><b>Click</b> / <b>Space</b> Dash</span>
-            <span><b>Right-Click</b> / <b>E</b> JD Suction</span>
-            <span><b>Esc</b> Pause</span>
+          <div class="orig-controls-hint">
+            <b>Mouse / WASD</b> Swim • <b>Click / Space</b> Dash • <b>RMB / E</b> JD Suction • <b>Esc</b> Pause
           </div>
         </div>
       </div>
 
-      <!-- Story Mode Map Overlay -->
+      <!-- Story Mode Map Overlay (Authentic Map Layout) -->
       <div id="overlay-map" class="overlay map-overlay">
         <div class="map-container">
           <img class="map-bg" src="assets/resources/menus/mapBg.jpg" alt="Ocean Map" />
+          <img class="orig-logo" src="assets/resources/menus/logo.png" alt="Feeding Frenzy" />
+
+          <button class="orig-region-btn reg-andy" data-char="Andy" title="Andy (Stages 1–8)"></button>
+          <button class="orig-region-btn reg-leon" data-char="Leon" title="Leon (Stages 9–16)"></button>
+          <button class="orig-region-btn reg-eddie" data-char="Eddie" title="Eddie (Stages 17–24)"></button>
+          <button class="orig-region-btn reg-jd" data-char="JD" title="JD (Stages 25–32)"></button>
+          <button class="orig-region-btn reg-orville" data-char="Orville" title="Orville (Stages 33–40)"></button>
+
           <svg id="map-trail" class="map-trail" viewBox="0 0 640 480" preserveAspectRatio="none"></svg>
           <div id="map-nodes" class="map-nodes"></div>
-          <div class="map-topbar">
-            <button id="btn-map-back" class="btn-aqua-sm">← Back</button>
-            <div id="map-hover-info" class="map-hover-info">Click any stage pearl on the map to dive in!</div>
-          </div>
+
+          <div id="map-hover-info" class="orig-map-label">Click any pearl on the map to start!</div>
+          <button id="btn-map-back" class="orig-back-btn">Back to Menu</button>
         </div>
       </div>
 

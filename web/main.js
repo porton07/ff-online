@@ -145,6 +145,20 @@ function buildStageGrid() {
   });
 
   ui.mapTrail.innerHTML = `<polyline points="${pts.join(" ")}" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2" stroke-dasharray="5,4" />`;
+
+  document.querySelectorAll(".orig-region-btn").forEach((btn) => {
+    const ch = btn.dataset.char;
+    const firstIdx = manifest.findIndex((m) => m.character === ch);
+    if (firstIdx >= 0) {
+      btn.onmouseenter = () => {
+        ui.mapHoverInfo.textContent = `${ch} Region • Starts at Stage ${firstIdx + 1}: ${manifest[firstIdx].name}`;
+      };
+      btn.onclick = () => {
+        ui.ovMap.classList.remove("active");
+        startStage(firstIdx, false, true);
+      };
+    }
+  });
 }
 
 function startStage(idx, timedMode, resetRun) {

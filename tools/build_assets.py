@@ -406,16 +406,12 @@ def main():
             shutil.copy2(splash, dst)
 
     # Copy map, menu, and HUD images
-    for ui_img in ["resources/menus/mapBg.jpg", "resources/menus/mainMenuBG.jpg"]:
-        raw_ui = find_raw_ci(ui_img)
-        if raw_ui:
-            composite_image(raw_ui, raw_ui.relative_to(RAW).as_posix())
-
-    hud_dir = find_raw_ci("resources/hud")
-    if hud_dir and hud_dir.is_dir():
-        for f in hud_dir.iterdir():
-            if f.is_file() and not f.name.startswith("_") and f.suffix.lower() in (".jpg", ".jpeg", ".png"):
-                composite_image(f, f.relative_to(RAW).as_posix())
+    for folder in ["resources/menus", "resources/menus/map", "resources/hud"]:
+        d = find_raw_ci(folder)
+        if d and d.is_dir():
+            for f in d.iterdir():
+                if f.is_file() and not f.name.startswith("_") and f.suffix.lower() in (".jpg", ".jpeg", ".png"):
+                    composite_image(f, f.relative_to(RAW).as_posix())
 
     data = {
         "manifest": manifest,
