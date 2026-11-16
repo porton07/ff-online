@@ -254,6 +254,8 @@ function renderLobby() {
 
 let wasm = null;
 let images = [];
+let imageFolders = [];
+const folderFallback = new Map();
 let manifest = [];
 let muted = false;
 let currentMusicUrl = "";
@@ -433,8 +435,11 @@ function renderFrame(hud, frameArray) {
     const alpha = cmds[i + 7];
     const hue = cmds[i + 8];
 
-    const img = images[imgId];
-    if (!img || !img.complete || img.naturalWidth === 0) continue;
+    let img = images[imgId];
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      img = folderFallback.get(imageFolders[imgId]);
+      if (!img || !img.complete || img.naturalWidth === 0) continue;
+    }
 
     ctx.save();
     ctx.globalAlpha = alpha;
@@ -981,8 +986,18 @@ async function boot() {
   wasm.init((Date.now() & 0xffff_ffff) >>> 0);
   const initData = JSON.parse(readStr(wasm.get_init_ptr(), wasm.get_init_len()));
   manifest = initData.manifest;
-  images = initData.images.map((src) => {
+  imageFolders = initData.images.map((src) => {
+    const slash = src.lastIndexOf("/");
+    return slash >= 0 ? src.slice(0, slash) : src;
+  });
+  images = initData.images.map((src, idx) => {
     const im = new Image();
+    const folder = imageFolders[idx];
+    im.onload = () => {
+      if (!folderFallback.has(folder) || src.includes("swim")) {
+        folderFallback.set(folder, im);
+      }
+    };
     im.src = src;
     return im;
   });

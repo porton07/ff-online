@@ -1872,7 +1872,11 @@ impl Engine {
                             let flip = if p.facing_right { -1.0 } else { 1.0 };
                             let rot_sign = if p.facing_right { 1.0 } else { -1.0 };
                             let norm = if self.is_coop_mode {
-                                150.0 / fr.w.max(1.0)
+                                let ref_w = self
+                                    .pick_frame(&pcfg.anim_path, &["swim", "idle"], 0.0, 20.0, true)
+                                    .map(|f| f.w)
+                                    .unwrap_or(fr.w);
+                                150.0 / ref_w.max(1.0)
                             } else {
                                 1.0
                             };
