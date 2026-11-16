@@ -26,7 +26,7 @@ pub extern "C" fn init(seed: u32) {
 
 #[no_mangle]
 pub extern "C" fn start_stage(stage_idx: u32, timed_mode: u32, reset_run: u32) {
-    with_engine(|e| e.start_stage(stage_idx as usize, timed_mode != 0, reset_run != 0, 1));
+    with_engine(|e| e.start_stage(stage_idx as usize, timed_mode != 0, reset_run != 0, 1, false));
 }
 
 #[no_mangle]
@@ -42,6 +42,7 @@ pub extern "C" fn start_coop_stage(
             timed_mode != 0,
             reset_run != 0,
             player_count as usize,
+            true,
         )
     });
 }

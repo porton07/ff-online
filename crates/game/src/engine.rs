@@ -293,6 +293,7 @@ pub struct Engine {
     pub stage_clear_timer: f32,
     pub next_school_id: u32,
     pub team_food_progress: f32,
+    pub is_coop_mode: bool,
     pub coop_fish_picks: [Option<usize>; 4],
 
     pub players: Vec<Player>,
@@ -337,6 +338,7 @@ impl Engine {
             stage_clear_timer: 0.0,
             next_school_id: 1,
             team_food_progress: 0.0,
+            is_coop_mode: false,
             coop_fish_picks: [None; 4],
             players: vec![Player::new_at(400.0, 300.0, 1.5, 0.4, String::new(), 3, 0.0)],
             inputs: vec![InputState {
@@ -364,10 +366,18 @@ impl Engine {
         self.data.stages.get(&entry.path)
     }
 
-    pub fn start_stage(&mut self, stage_idx: usize, timed_mode: bool, reset_run: bool, player_count: usize) {
+    pub fn start_stage(
+        &mut self,
+        stage_idx: usize,
+        timed_mode: bool,
+        reset_run: bool,
+        player_count: usize,
+        is_coop: bool,
+    ) {
         let idx = stage_idx.min(self.data.manifest.len().saturating_sub(1));
         self.stage_idx = idx;
         self.timed_mode = timed_mode;
+        self.is_coop_mode = is_coop;
         let pcount = player_count.clamp(1, 4);
 
         if reset_run {
@@ -424,7 +434,7 @@ impl Engine {
             } else {
                 *old_lives.get(i).unwrap_or(&3)
             };
-            let cfg_for_p = if pcount > 1 {
+            let cfg_for_p = if is_coop {
                 let fish_keys = [
                     "config/fish/angelplayer.xml",
                     "config/fish/lionplayer.xml",
@@ -1214,7 +1224,7 @@ impl Engine {
             let px = self.players[pidx].x;
             let py = self.players[pidx].y;
             let p_facing = self.players[pidx].facing_right;
-            let p_norm = if self.players.len() > 1 {
+            let p_norm = if self.is_coop_mode {
                 150.0 / pw_raw.max(1.0)
             } else {
                 1.0
@@ -1811,7 +1821,7 @@ impl Engine {
                         if let Some(id) = self.data.image_id(&fr.path) {
                             let flip = if p.facing_right { -1.0 } else { 1.0 };
                             let rot_sign = if p.facing_right { 1.0 } else { -1.0 };
-                            let norm = if self.players.len() > 1 {
+                            let norm = if self.is_coop_mode {
                                 150.0 / fr.w.max(1.0)
                             } else {
                                 1.0
