@@ -103,6 +103,7 @@ pub struct Player {
     pub speed_boost_timer: f32,
     pub double_pts_timer: f32,
     pub suck_timer: f32,
+    pub suck_cooldown: f32,
     pub size: f32,
     pub scale: f32,
     pub tier_idx: usize,
@@ -134,6 +135,7 @@ impl Player {
             speed_boost_timer: 0.0,
             double_pts_timer: 0.0,
             suck_timer: 0.0,
+            suck_cooldown: 0.0,
             size,
             scale,
             tier_idx: 0,
@@ -657,17 +659,21 @@ impl Engine {
         if p.suck_timer > 0.0 {
             p.suck_timer = (p.suck_timer - dt).max(0.0);
         }
+        if p.suck_cooldown > 0.0 {
+            p.suck_cooldown = (p.suck_cooldown - dt).max(0.0);
+        }
 
         let is_andy = p.config_key.contains("angelplayer");
         let is_orville = p.config_key.contains("orcaplayer");
-        let perk_speed_mult = if is_orville { 1.10 } else { 1.0 };
+        let perk_speed_mult = if is_orville { 1.06 } else { 1.0 };
         let bonus_speed_mult = (if p.speed_boost_timer > 0.0 { 1.8 } else { 1.0 }) * perk_speed_mult;
         let mut spawn_dash_bubbles = None;
 
         if p.stun_timer <= 0.0 {
             if inp.dash_just_pressed && p.dash_cooldown <= 0.0 {
-                p.dash_timer = if is_orville { 0.31 } else { 0.25 };
-                p.dash_cooldown = if is_andy { 0.30 } else { 0.40 };
+                p.dash_timer = if is_orville { 0.28 } else { 0.25 };
+                p.dash_cooldown = if is_andy { 0.28 } else { 0.40 };
+                let dash_burst = if is_andy { 2.35 } else { 2.2 };
                 let (dir_x, dir_y) = if p.vx.abs() > 15.0 || p.vy.abs() > 15.0 {
                     let l = (p.vx * p.vx + p.vy * p.vy).sqrt();
                     (p.vx / l, p.vy / l)
@@ -676,14 +682,15 @@ impl Engine {
                 } else {
                     (-1.0, 0.0)
                 };
-                p.vx = dir_x * base_max_x * 2.2 * bonus_speed_mult;
-                p.vy = dir_y * base_max_y * 2.2 * bonus_speed_mult;
+                p.vx = dir_x * base_max_x * dash_burst * bonus_speed_mult;
+                p.vy = dir_y * base_max_y * dash_burst * bonus_speed_mult;
                 self.sounds.push("playerDash.wav".to_string());
                 spawn_dash_bubbles = Some((p.x, p.y, dir_x));
             }
 
-            if p.is_john_dory && inp.special_just_pressed && p.suck_timer <= 0.0 {
-                p.suck_timer = 1.4;
+            if p.is_john_dory && inp.special_just_pressed && p.suck_timer <= 0.0 && p.suck_cooldown <= 0.0 {
+                p.suck_timer = 1.1;
+                p.suck_cooldown = 4.5;
                 self.sounds.push("jdSuckSound.wav".to_string());
             }
 
@@ -1101,12 +1108,12 @@ impl Engine {
                         }
                     }
 
-                    if any_sucking && cfg.size <= nearest_size && nearest_dist < 230.0 {
-                        e.vx += (nearest_dx / nearest_dist) * 560.0 * dt;
-                        e.vy += (nearest_dy / nearest_dist) * 560.0 * dt;
-                    } else if lure_dist < 105.0 && cfg.size <= nearest_size {
-                        e.vx += (lure_dx / lure_dist) * 180.0 * dt;
-                        e.vy += (lure_dy / lure_dist) * 180.0 * dt;
+                    if any_sucking && cfg.size <= nearest_size && nearest_dist < 205.0 {
+                        e.vx += (nearest_dx / nearest_dist) * 420.0 * dt;
+                        e.vy += (nearest_dy / nearest_dist) * 420.0 * dt;
+                    } else if lure_dist < 95.0 && cfg.size <= nearest_size {
+                        e.vx += (lure_dx / lure_dist) * 150.0 * dt;
+                        e.vy += (lure_dy / lure_dist) * 150.0 * dt;
                     }
 
                     if nearest_dist < cfg.sight_dist {
@@ -1327,8 +1334,13 @@ impl Engine {
                                 self.players[pidx].invuln_timer = 1.5;
                                 self.sounds.push("pufferBounce.wav".to_string());
                             } else {
-                                self.players[pidx].stun_timer = 1.5;
-                                self.players[pidx].invuln_timer = 1.7;
+                                let stun_dur = if self.players[pidx].config_key.contains("lionplayer") {
+                                    0.9
+                                } else {
+                                    1.5
+                                };
+                                self.players[pidx].stun_timer = stun_dur;
+                                self.players[pidx].invuln_timer = stun_dur + 0.2;
                                 self.sounds.push("playerStunned.wav".to_string());
                                 self.popups.push(Popup {
                                     x: self.players[pidx].x,
@@ -1394,11 +1406,11 @@ impl Engine {
 
                                 let double_mult = if self.players[pidx].double_pts_timer > 0.0 { 2 } else { 1 };
                                 let eddie_bonus = if self.players[pidx].config_key.contains("anglerplayer") {
-                                    1.10
+                                    1.08
                                 } else {
                                     1.0
                                 };
-                                let pts = ((cfg.food_value * eddie_bonus) as u32) * self.frenzy_mult * double_mult;
+                                let pts = ((cfg.food_value * eddie_bonus).round() as u32) * self.frenzy_mult * double_mult;
                                 self.score += pts;
                                 if self.score > self.high_score {
                                     self.high_score = self.score;

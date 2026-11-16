@@ -48,11 +48,11 @@ let coop = {
 };
 
 const PLAYABLE_FISH = [
-  { name: "Andy", sub: "Quick Dash", img: "assets/resources/menus/map/mapangelbtn_normal.png" },
-  { name: "Leon", sub: "Poison Immune", img: "assets/resources/menus/map/maplionbtn_normal.png" },
-  { name: "Eddie", sub: "Lure +10% Pts", img: "assets/resources/menus/map/mapanglerbtn_normal.png" },
+  { name: "Andy", sub: "Quick Dash+", img: "assets/resources/menus/map/mapangelbtn_normal.png" },
+  { name: "Leon", sub: "Resist + Frenzy", img: "assets/resources/menus/map/maplionbtn_normal.png" },
+  { name: "Eddie", sub: "Lure +8% Pts", img: "assets/resources/menus/map/mapanglerbtn_normal.png" },
   { name: "J.D.", sub: "Suction (E/RMB)", img: "assets/resources/menus/map/mapjdbtn_normal.png" },
-  { name: "Orville", sub: "+10% Speed", img: "assets/resources/menus/map/maporcabtn_normal.png" },
+  { name: "Orville", sub: "+6% Speed", img: "assets/resources/menus/map/maporcabtn_normal.png" },
 ];
 
 function renderLobby() {
