@@ -702,9 +702,14 @@ function setupInput() {
   document.getElementById("btn-map-back").onclick = () => closeStoryMap();
   document.getElementById("btn-play-timed").onclick = () => startStage(0, true, true);
   document.getElementById("btn-coop-create").onclick = async () => {
-    const r = await fetch("/api/create");
-    const { code } = await r.json();
-    connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=host`);
+    try {
+      const r = await fetch("/api/create");
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const { code } = await r.json();
+      connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=host`);
+    } catch (err) {
+      alert("Cannot create Co-Op room: " + err.message);
+    }
   };
   document.getElementById("btn-coop-join").onclick = () => {
     const code = ui.coopCodeInput.value.trim().toUpperCase();
