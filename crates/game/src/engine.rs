@@ -117,7 +117,7 @@ pub struct Player {
 
 impl Player {
     fn new_at(x: f32, y: f32, size: f32, scale: f32, config_key: String, lives: i32, hue_shift: f32) -> Self {
-        let is_jd = config_key.contains("johndory");
+        let is_jd = config_key.contains("jdplayer") || config_key.contains("johndory");
         Self {
             x,
             y,

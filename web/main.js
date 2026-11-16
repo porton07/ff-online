@@ -987,20 +987,27 @@ async function boot() {
   const initData = JSON.parse(readStr(wasm.get_init_ptr(), wasm.get_init_len()));
   manifest = initData.manifest;
   imageFolders = initData.images.map((src) => {
-    const slash = src.lastIndexOf("/");
-    return slash >= 0 ? src.slice(0, slash) : src;
+    const parts = src.split("/");
+    return parts.length >= 4 ? parts.slice(0, 3).join("/") : parts.slice(0, -1).join("/");
   });
-  images = initData.images.map((src, idx) => {
+  images = new Array(initData.images.length);
+  const loadOrder = initData.images.map((src, idx) => ({
+    src,
+    idx,
+    prio: /\/(AngelFish|Lion|Angler|JohnDory|Orca)\//.test(src) ? 0 : 1,
+  }));
+  loadOrder.sort((a, b) => a.prio - b.prio);
+  for (const { src, idx } of loadOrder) {
     const im = new Image();
     const folder = imageFolders[idx];
     im.onload = () => {
-      if (!folderFallback.has(folder) || src.includes("swim")) {
+      if (!folderFallback.has(folder) || src.includes("/swim/")) {
         folderFallback.set(folder, im);
       }
     };
     im.src = src;
-    return im;
-  });
+    images[idx] = im;
+  }
 
   buildStageGrid();
   requestAnimationFrame(loop);
