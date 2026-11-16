@@ -6,9 +6,6 @@ compatibility_date = "2025-01-01"
 directory = "web"
 binding = "ASSETS"
 
-[build]
-command = "cd crates/cf-worker && worker-build --release"
-
 [[durable_objects.bindings]]
 name = "COOP_ROOMS"
 class_name = "CoopRoom"

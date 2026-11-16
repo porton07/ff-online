@@ -28,13 +28,15 @@ jobs:
       - name: Install worker-build
         run: cargo install worker-build --locked
 
-      - name: Build Game WASM
+      - name: Build Game WASM & Cloudflare Rust Worker
         run: |
           cargo build --manifest-path crates/game/Cargo.toml --target wasm32-unknown-unknown --release
           cp crates/game/target/wasm32-unknown-unknown/release/feeding_frenzy_wasm.wasm web/feeding_frenzy_wasm.wasm
+          (cd crates/cf-worker && worker-build --release)
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
+          wranglerVersion: "4"
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
