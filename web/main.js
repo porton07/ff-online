@@ -270,11 +270,13 @@ function renderFrame(hud, frameArray) {
     }
   }
 
-  // Authentic In-Canvas HUD (scaled 1.25x from 640x480 -> 800x600)
+  // Authentic In-Canvas HUD (scaled proportionally to canvas width w)
   if (hud.state !== "title") {
+    ctx.save();
+    ctx.scale(w / 800, 1);
     const hBg = hudSprites.bg;
     if (hBg && hBg.complete && hBg.naturalWidth > 0) {
-      ctx.drawImage(hBg, 0, 0, w, 105);
+      ctx.drawImage(hBg, 0, 0, 800, 105);
     }
 
     // 4 MENU Fish Bubbles
@@ -365,6 +367,7 @@ function renderFrame(hud, frameArray) {
       ctx.fillStyle = "#ffea00";
       ctx.fillText(`${hud.frenzy_mult}X`, 750, 38);
     }
+    ctx.restore();
     ctx.restore();
 
     // Timer at bottom center for Bonus Stages / Time Attack
