@@ -26,6 +26,7 @@ const ui = {
   goTitle: document.getElementById("gameover-title"),
   goSummary: document.getElementById("gameover-summary"),
   btnMute: document.getElementById("btn-mute"),
+  btnLang: document.getElementById("btn-lang"),
   coopStatus: document.getElementById("coop-status"),
   coopLobby: document.getElementById("coop-lobby"),
   btnCoopStart: document.getElementById("btn-coop-start"),
@@ -47,12 +48,166 @@ let coop = {
   roster: [{ playerIdx: 0, fishIdx: 0, name: "Player 1" }],
 };
 
+const I18N = {
+  en: {
+    btn_mute_title: "Toggle Sound",
+    helper_story: "Explore the ocean & eat your way to the top of the food chain!",
+    helper_time: "See how far you can last before the Time Attack Clock runs out!",
+    coop_title: "ONLINE CO-OP (2–4P)",
+    create_room: "Create Room",
+    room_list: "Room List",
+    code_placeholder: "CODE",
+    join: "Join",
+    choose_stage: "Choose Stage on Map",
+    controls_hint: "<b>Mouse / WASD</b> Swim • <b>Click / Space</b> Dash • <b>RMB / E</b> JD Suction • <b>Esc</b> Pause",
+    open_rooms: "OPEN CO-OP ROOMS",
+    refresh: "Refresh",
+    back: "Back",
+    lobby_title: "ONLINE CO-OP LOBBY",
+    your_name: "YOUR NAME",
+    name_placeholder: "Player",
+    room_code: "ROOM CODE:",
+    copy: "Copy",
+    choose_fish: "CHOOSE YOUR FISH",
+    players_in_room: "PLAYERS IN ROOM",
+    leave_room: "Leave Room",
+    waiting_host: "Waiting for Host to start...",
+    start_arena: "▶ Start Co-Op Arena (1280×960)",
+    map_hint: "Click any pearl on the map to start!",
+    back_to_menu: "Back to Menu",
+    paused: "PAUSED",
+    resume: "Resume",
+    restart_stage: "Restart Stage",
+    main_menu: "Main Menu",
+    stage_clear: "STAGE CLEAR!",
+    next_stage: "Next Stage",
+    game_over: "GAME OVER",
+    you_win: "YOU WIN!",
+    try_again: "Try Again",
+    fish_andy_sub: "Quick Dash+",
+    fish_leon_sub: "Resist + Frenzy",
+    fish_eddie_sub: "Lure +8% Pts",
+    fish_jd_sub: "Suction (E/RMB)",
+    fish_orville_sub: "+6% Speed",
+    you_tag: " (You)",
+    waiting_slot: "Waiting...",
+    player_default: "Player",
+    loading_rooms: "Loading rooms...",
+    no_rooms: "No open rooms right now. Create one!",
+    failed_rooms: "Failed to load rooms.",
+    host_label: "Host",
+    stage_word: "Stage",
+    starts_at_stage: "Starts at Stage",
+    region_word: "Region",
+    coop_arena: "Co-Op Arena (1280×960)",
+    speed_buff: "SPEED",
+    jd_suction_buff: "JD SUCTION (RMB/E)",
+    score_word: "Score",
+    fish_eaten_word: "Fish Eaten",
+    final_score_word: "Final Score",
+    high_score_word: "High Score",
+    room_closed: "Host closed the Co-Op room.",
+    disconnected: "Disconnected from Co-Op room.",
+    cannot_create: "Cannot create Co-Op room: ",
+  },
+  th: {
+    btn_mute_title: "เปิด/ปิดเสียง",
+    helper_story: "ออกสำรวจมหาสมุทรและกินปลาเล็กเพื่อไต่ขึ้นสู่จุดสูงสุดของห่วงโซ่อาหาร!",
+    helper_time: "ท้าทายตัวเองว่าจะเอาชีวิตรอดได้นานแค่ไหนก่อนหมดเวลา!",
+    coop_title: "ออนไลน์ CO-OP (2–4 คน)",
+    create_room: "สร้างห้อง",
+    room_list: "รายการห้อง",
+    code_placeholder: "รหัส",
+    join: "เข้าร่วม",
+    choose_stage: "เลือกด่านบนแผนที่",
+    controls_hint: "<b>เมาส์ / WASD</b> ว่ายน้ำ • <b>คลิก / Space</b> พุ่ง • <b>คลิกขวา / E</b> ดูดเหยื่อ (J.D.) • <b>Esc</b> หยุดเกม",
+    open_rooms: "ห้องออนไลน์ที่เปิดอยู่",
+    refresh: "รีเฟรช",
+    back: "กลับ",
+    lobby_title: "ห้องรอออนไลน์ CO-OP",
+    your_name: "ชื่อของคุณ",
+    name_placeholder: "ผู้เล่น",
+    room_code: "รหัสห้อง:",
+    copy: "คัดลอก",
+    choose_fish: "เลือกปลาของคุณ",
+    players_in_room: "ผู้เล่นในห้อง",
+    leave_room: "ออกจากห้อง",
+    waiting_host: "รอหัวห้องกดเริ่มเกม...",
+    start_arena: "▶ เริ่มเกม Co-Op (1280×960)",
+    map_hint: "คลิกที่ไข่มุกบนแผนที่เพื่อเริ่มด่าน!",
+    back_to_menu: "กลับเมนูหลัก",
+    paused: "หยุดเกมชั่วคราว",
+    resume: "เล่นต่อ",
+    restart_stage: "เริ่มด่านใหม่",
+    main_menu: "เมนูหลัก",
+    stage_clear: "ผ่านด่าน!",
+    next_stage: "ด่านถัดไป",
+    game_over: "จบเกม",
+    you_win: "ชนะแล้ว!",
+    try_again: "ลองอีกครั้ง",
+    fish_andy_sub: "พุ่งไว+",
+    fish_leon_sub: "กันพิษ + Frenzy ไว",
+    fish_eddie_sub: "ดึงเหยื่อ +8% แต้ม",
+    fish_jd_sub: "ดูดเหยื่อ (E/คลิกขวา)",
+    fish_orville_sub: "ว่ายเร็ว +6%",
+    you_tag: " (คุณ)",
+    waiting_slot: "รอผู้เล่น...",
+    player_default: "ผู้เล่น",
+    loading_rooms: "กำลังโหลดรายการห้อง...",
+    no_rooms: "ยังไม่มีห้องที่เปิดอยู่ กดสร้างห้องได้เลย!",
+    failed_rooms: "โหลดรายการห้องไม่สำเร็จ",
+    host_label: "หัวห้อง",
+    stage_word: "ด่าน",
+    starts_at_stage: "เริ่มที่ด่าน",
+    region_word: "โซน",
+    coop_arena: "อารีน่า Co-Op (1280×960)",
+    speed_buff: "เร็วขึ้น",
+    jd_suction_buff: "ดูดเหยื่อ J.D. (คลิกขวา/E)",
+    score_word: "คะแนน",
+    fish_eaten_word: "กินปลา",
+    final_score_word: "คะแนนรวม",
+    high_score_word: "คะแนนสูงสุด",
+    room_closed: "หัวห้องปิดห้อง Co-Op แล้ว",
+    disconnected: "ขาดการเชื่อมต่อจากห้อง Co-Op",
+    cannot_create: "ไม่สามารถสร้างห้อง Co-Op ได้: ",
+  },
+};
+
+let currentLang = localStorage.getItem("ff_lang") || (navigator.language?.toLowerCase().startsWith("th") ? "th" : "en");
+if (!I18N[currentLang]) currentLang = "en";
+
+function t(key) {
+  return (I18N[currentLang] && I18N[currentLang][key]) || I18N.en[key] || key;
+}
+
+function applyI18n() {
+  document.documentElement.lang = currentLang;
+  if (ui.btnLang) {
+    ui.btnLang.textContent = currentLang === "th" ? "TH" : "EN";
+  }
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  document.querySelectorAll("[data-i18n-html]").forEach((el) => {
+    el.innerHTML = t(el.dataset.i18nHtml);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+    el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    el.title = t(el.dataset.i18nTitle);
+  });
+  if (ui.ovLobby.classList.contains("active")) renderLobby();
+  if (ui.ovRooms.classList.contains("active")) loadRoomList();
+  if (lastHud) updateHud(lastHud);
+}
+
 const PLAYABLE_FISH = [
-  { name: "Andy", sub: "Quick Dash+", img: "assets/resources/menus/map/mapangelbtn_normal.png" },
-  { name: "Leon", sub: "Resist + Frenzy", img: "assets/resources/menus/map/maplionbtn_normal.png" },
-  { name: "Eddie", sub: "Lure +8% Pts", img: "assets/resources/menus/map/mapanglerbtn_normal.png" },
-  { name: "J.D.", sub: "Suction (E/RMB)", img: "assets/resources/menus/map/mapjdbtn_normal.png" },
-  { name: "Orville", sub: "+6% Speed", img: "assets/resources/menus/map/maporcabtn_normal.png" },
+  { name: "Andy", subKey: "fish_andy_sub", img: "assets/resources/menus/map/mapangelbtn_normal.png" },
+  { name: "Leon", subKey: "fish_leon_sub", img: "assets/resources/menus/map/maplionbtn_normal.png" },
+  { name: "Eddie", subKey: "fish_eddie_sub", img: "assets/resources/menus/map/mapanglerbtn_normal.png" },
+  { name: "J.D.", subKey: "fish_jd_sub", img: "assets/resources/menus/map/mapjdbtn_normal.png" },
+  { name: "Orville", subKey: "fish_orville_sub", img: "assets/resources/menus/map/maporcabtn_normal.png" },
 ];
 
 function renderLobby() {
@@ -64,7 +219,7 @@ function renderLobby() {
   PLAYABLE_FISH.forEach((f, idx) => {
     const btn = document.createElement("button");
     btn.className = "fish-pick-card" + (coop.myFishIdx === idx ? " selected" : "");
-    btn.innerHTML = `<img src="${f.img}" alt="${f.name}" /><span>${f.name}</span><span class="sub">${f.sub}</span>`;
+    btn.innerHTML = `<img src="${f.img}" alt="${f.name}" /><span>${f.name}</span><span class="sub">${t(f.subKey)}</span>`;
     btn.onclick = () => {
       coop.myFishIdx = idx;
       if (coop.isHost) {
@@ -82,16 +237,16 @@ function renderLobby() {
   for (let i = 0; i < 4; i++) {
     const slot = document.createElement("div");
     if (i < coop.playerCount) {
-      const entry = coop.roster[i] || { fishIdx: i % 5, name: `Player ${i + 1}` };
+      const entry = coop.roster[i] || { fishIdx: i % 5, name: `${t("player_default")} ${i + 1}` };
       const fi = entry.fishIdx ?? (i % 5);
       const fish = PLAYABLE_FISH[fi] || PLAYABLE_FISH[0];
-      const pName = entry.name || `Player ${i + 1}`;
-      const you = i === coop.playerIdx ? " (You)" : "";
+      const pName = entry.name || `${t("player_default")} ${i + 1}`;
+      const you = i === coop.playerIdx ? t("you_tag") : "";
       slot.className = "roster-slot filled";
       slot.innerHTML = `<img src="${fish.img}" alt="${fish.name}" /><strong>${pName}${you}</strong><span class="fish-label">P${i + 1} • ${fish.name}</span>`;
     } else {
       slot.className = "roster-slot";
-      slot.innerHTML = `<strong>P${i + 1}</strong><span class="fish-label">Waiting...</span>`;
+      slot.innerHTML = `<strong>P${i + 1}</strong><span class="fish-label">${t("waiting_slot")}</span>`;
     }
     ui.lobbyRoster.appendChild(slot);
   }
@@ -196,9 +351,9 @@ function buildStageGrid() {
     node.style.left = `${(mx / 640) * 100}%`;
     node.style.top = `${(my / 480) * 100}%`;
     node.textContent = String(idx + 1);
-    node.title = `Stage ${idx + 1}: ${entry.name} (${entry.character})`;
+    node.title = `${t("stage_word")} ${idx + 1}: ${entry.name} (${entry.character})`;
     node.onmouseenter = () => {
-      ui.mapHoverInfo.textContent = `Stage ${idx + 1}: ${entry.name} • ${entry.character}`;
+      ui.mapHoverInfo.textContent = `${t("stage_word")} ${idx + 1}: ${entry.name} • ${entry.character}`;
     };
     node.onclick = () => {
       ui.ovMap.classList.remove("active");
@@ -214,7 +369,7 @@ function buildStageGrid() {
     const firstIdx = manifest.findIndex((m) => m.character === ch);
     if (firstIdx >= 0) {
       btn.onmouseenter = () => {
-        ui.mapHoverInfo.textContent = `${ch} Region • Starts at Stage ${firstIdx + 1}: ${manifest[firstIdx].name}`;
+        ui.mapHoverInfo.textContent = `${ch} ${t("region_word")} • ${t("starts_at_stage")} ${firstIdx + 1}: ${manifest[firstIdx].name}`;
       };
       btn.onclick = () => {
         ui.ovMap.classList.remove("active");
@@ -498,17 +653,19 @@ function renderFrame(hud, frameArray) {
 function updateUi(hud) {
   const buffs = [];
   if (hud.buffs.shield) buffs.push("SHIELD");
-  if (hud.buffs.speed > 0) buffs.push(`SPEED ${hud.buffs.speed.toFixed(0)}s`);
+  if (hud.buffs.speed > 0) buffs.push(`${t("speed_buff")} ${hud.buffs.speed.toFixed(0)}s`);
   if (hud.buffs.double_pts > 0) buffs.push(`2X ${hud.buffs.double_pts.toFixed(0)}s`);
   if (hud.buffs.poison > 0) buffs.push(`POISON ${hud.buffs.poison.toFixed(0)}s`);
   if (hud.buffs.stunned > 0) buffs.push(`STUNNED`);
-  if (hud.player_is_jd) buffs.push(`JD SUCTION (RMB/E)`);
+  if (hud.player_is_jd) buffs.push(t("jd_suction_buff"));
   ui.buffBar.innerHTML = buffs.map((b) => `<span class="buff-pill">${b}</span>`).join("");
 
   ui.stageBanner.textContent =
     hud.state === "title"
       ? ""
-      : `${hud.character} • Stage ${hud.stage_idx + 1}/${hud.stage_count}: ${hud.stage_name}`;
+      : coop.active
+      ? `${t("coop_arena")} • ${coop.playerCount}P`
+      : `${hud.character} • ${t("stage_word")} ${hud.stage_idx + 1}/${hud.stage_count}: ${hud.stage_name}`;
 
   ui.ovTitle.classList.toggle(
     "active",
@@ -525,10 +682,10 @@ function updateUi(hud) {
   );
 
   if (hud.state === "stage_clear") {
-    ui.clearSummary.textContent = `Score: ${hud.score.toLocaleString()} • Fish Eaten: ${hud.fish_eaten}`;
+    ui.clearSummary.textContent = `${t("score_word")}: ${hud.score.toLocaleString()} • ${t("fish_eaten_word")}: ${hud.fish_eaten}`;
   } else if (hud.state === "game_over" || hud.state === "game_won") {
-    ui.goTitle.textContent = hud.state === "game_won" ? "YOU WIN!" : "GAME OVER";
-    ui.goSummary.textContent = `Final Score: ${hud.score.toLocaleString()} • High Score: ${hud.high_score.toLocaleString()}`;
+    ui.goTitle.textContent = hud.state === "game_won" ? t("you_win") : t("game_over");
+    ui.goSummary.textContent = `${t("final_score_word")}: ${hud.score.toLocaleString()} • ${t("high_score_word")}: ${hud.high_score.toLocaleString()}`;
   }
 
   for (const s of hud.sounds) {
@@ -655,7 +812,7 @@ function connectCoopWs(wsPath, onOpen) {
       renderFrame(msg.hud, msg.frame);
       updateUi(msg.hud);
     } else if (msg.type === "room_closed") {
-      alert("Host closed the Co-Op room.");
+      alert(t("room_closed"));
       location.reload();
     } else if (msg.type === "error") {
       alert(msg.message);
@@ -663,25 +820,25 @@ function connectCoopWs(wsPath, onOpen) {
   };
   ws.onclose = () => {
     if (coop.active && !coop.isHost) {
-      ui.coopStatus.textContent = "Disconnected from Co-Op room.";
+      ui.coopStatus.textContent = t("disconnected");
     }
   };
 }
 
 async function loadRoomList() {
-  ui.roomsList.innerHTML = `<div class="room-empty">Loading rooms...</div>`;
+  ui.roomsList.innerHTML = `<div class="room-empty">${t("loading_rooms")}</div>`;
   try {
     const r = await fetch("/api/rooms");
     const list = await r.json();
     if (!Array.isArray(list) || list.length === 0) {
-      ui.roomsList.innerHTML = `<div class="room-empty">No open rooms right now. Create one!</div>`;
+      ui.roomsList.innerHTML = `<div class="room-empty">${t("no_rooms")}</div>`;
       return;
     }
     ui.roomsList.innerHTML = "";
     list.forEach((rm) => {
       const row = document.createElement("div");
       row.className = "room-item";
-      row.innerHTML = `<div class="room-item-info"><strong>${rm.code}</strong><span>Host: ${rm.hostName} • ${rm.count}/4</span></div><button class="btn-gold-sm">Join</button>`;
+      row.innerHTML = `<div class="room-item-info"><strong>${rm.code}</strong><span>${t("host_label")}: ${rm.hostName} • ${rm.count}/4</span></div><button class="btn-gold-sm">${t("join")}</button>`;
       row.querySelector("button").onclick = () => {
         ui.ovRooms.classList.remove("active");
         connectCoopWs(`/ws?code=${encodeURIComponent(rm.code)}&role=join`);
@@ -689,7 +846,7 @@ async function loadRoomList() {
       ui.roomsList.appendChild(row);
     });
   } catch {
-    ui.roomsList.innerHTML = `<div class="room-empty">Failed to load rooms.</div>`;
+    ui.roomsList.innerHTML = `<div class="room-empty">${t("failed_rooms")}</div>`;
   }
 }
 
@@ -748,7 +905,7 @@ function setupInput() {
       const { code } = await r.json();
       connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=host`);
     } catch (err) {
-      alert("Cannot create Co-Op room: " + err.message);
+      alert(t("cannot_create") + err.message);
     }
   };
   document.getElementById("btn-coop-rooms").onclick = () => {
@@ -795,6 +952,12 @@ function setupInput() {
   document.getElementById("btn-menu").onclick = backToTitle;
   document.getElementById("btn-pause").onclick = () => wasm && wasm.toggle_pause();
 
+  ui.btnLang.onclick = () => {
+    currentLang = currentLang === "th" ? "en" : "th";
+    localStorage.setItem("ff_lang", currentLang);
+    applyI18n();
+  };
+
   ui.btnMute.onclick = () => {
     muted = !muted;
     document.getElementById("icon-sound-on").hidden = muted;
@@ -809,6 +972,7 @@ function setupInput() {
 async function boot() {
   loadHudSprites();
   setupInput();
+  applyI18n();
   const resp = await fetch("feeding_frenzy_wasm.wasm");
   const bytes = await resp.arrayBuffer();
   const { instance } = await WebAssembly.instantiate(bytes, {});

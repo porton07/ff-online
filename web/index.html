@@ -20,7 +20,8 @@
       <canvas id="game-canvas" width="800" height="600"></canvas>
 
       <div class="floating-controls">
-        <button id="btn-mute" class="glass-btn" title="Toggle Sound">
+        <button id="btn-lang" class="glass-btn lang-btn" title="Switch Language (TH / EN)">TH</button>
+        <button id="btn-mute" class="glass-btn" title="Toggle Sound" data-i18n-title="btn_mute_title">
           <svg id="icon-sound-on" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
           <svg id="icon-sound-off" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
         </button>
@@ -44,34 +45,34 @@
           <button id="btn-play-story" class="orig-img-btn btn-new-game" title="Story Mode (Map)"></button>
           <button id="btn-play-timed" class="orig-img-btn btn-time-game" title="Time Attack"></button>
 
-          <div class="orig-helper orig-helper-story">
+          <div class="orig-helper orig-helper-story" data-i18n="helper_story">
             Explore the ocean &amp; eat your way to the top of the food chain!
           </div>
-          <div class="orig-helper orig-helper-time">
+          <div class="orig-helper orig-helper-time" data-i18n="helper_time">
             See how far you can last before the Time Attack Clock runs out!
           </div>
 
           <div class="orig-coop-bar">
             <span class="orig-coop-title">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              ONLINE CO-OP (2–4P)
+              <span data-i18n="coop_title">ONLINE CO-OP (2–4P)</span>
             </span>
-            <button id="btn-coop-create" class="btn-teal">Create Room</button>
-            <button id="btn-coop-rooms" class="btn-teal">Room List</button>
+            <button id="btn-coop-create" class="btn-teal" data-i18n="create_room">Create Room</button>
+            <button id="btn-coop-rooms" class="btn-teal" data-i18n="room_list">Room List</button>
             <div class="coop-join">
-              <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
-              <button id="btn-coop-join" class="btn-aqua-sm">Join</button>
+              <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" data-i18n-placeholder="code_placeholder" />
+              <button id="btn-coop-join" class="btn-aqua-sm" data-i18n="join">Join</button>
             </div>
             <div id="coop-lobby" class="coop-lobby" hidden>
               <span id="coop-status"></span>
               <button id="btn-coop-start" class="btn-gold-sm" hidden>
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                Choose Stage on Map
+                <span data-i18n="choose_stage">Choose Stage on Map</span>
               </button>
             </div>
           </div>
 
-          <div class="orig-controls-hint">
+          <div class="orig-controls-hint" data-i18n-html="controls_hint">
             <b>Mouse / WASD</b> Swim • <b>Click / Space</b> Dash • <b>RMB / E</b> JD Suction • <b>Esc</b> Pause
           </div>
         </div>
@@ -82,12 +83,12 @@
         <img class="lobby-bg-img" src="assets/resources/menus/mainbg.jpg" alt="" />
         <div class="lobby-shell rooms-shell">
           <div class="lobby-header">
-            <h2>OPEN CO-OP ROOMS</h2>
-            <button id="btn-rooms-refresh" class="btn-aqua-sm">Refresh</button>
+            <h2 data-i18n="open_rooms">OPEN CO-OP ROOMS</h2>
+            <button id="btn-rooms-refresh" class="btn-aqua-sm" data-i18n="refresh">Refresh</button>
           </div>
           <div id="rooms-list" class="rooms-list"></div>
           <div class="lobby-actions">
-            <button id="btn-rooms-close" class="btn-aqua-sm">Back</button>
+            <button id="btn-rooms-close" class="btn-aqua-sm" data-i18n="back">Back</button>
           </div>
         </div>
       </div>
@@ -98,34 +99,34 @@
         <div class="lobby-shell">
           <div class="lobby-header">
             <div class="lobby-title-group">
-              <h2>ONLINE CO-OP LOBBY</h2>
+              <h2 data-i18n="lobby_title">ONLINE CO-OP LOBBY</h2>
               <div class="lobby-name-wrap">
-                <label for="lobby-name-input">YOUR NAME</label>
-                <input id="lobby-name-input" type="text" maxlength="12" placeholder="Player" />
+                <label for="lobby-name-input" data-i18n="your_name">YOUR NAME</label>
+                <input id="lobby-name-input" type="text" maxlength="12" placeholder="Player" data-i18n-placeholder="name_placeholder" />
               </div>
             </div>
             <div class="lobby-code-pill">
-              <span>ROOM CODE:</span>
+              <span data-i18n="room_code">ROOM CODE:</span>
               <strong id="lobby-code">----</strong>
-              <button id="btn-copy-code" class="btn-aqua-sm" title="Copy Room Code">Copy</button>
+              <button id="btn-copy-code" class="btn-aqua-sm" title="Copy Room Code" data-i18n="copy">Copy</button>
             </div>
           </div>
 
           <div class="lobby-section">
-            <div class="section-title">CHOOSE YOUR FISH</div>
+            <div class="section-title" data-i18n="choose_fish">CHOOSE YOUR FISH</div>
             <div id="lobby-fish-grid" class="lobby-fish-grid"></div>
           </div>
 
           <div class="lobby-section">
-            <div class="section-title">PLAYERS IN ROOM</div>
+            <div class="section-title" data-i18n="players_in_room">PLAYERS IN ROOM</div>
             <div id="lobby-roster" class="lobby-roster"></div>
           </div>
 
           <div class="lobby-actions">
-            <button id="btn-lobby-leave" class="btn-aqua-sm">Leave Room</button>
-            <span id="lobby-wait-msg" class="lobby-wait-msg" hidden>Waiting for Host to start...</span>
+            <button id="btn-lobby-leave" class="btn-aqua-sm" data-i18n="leave_room">Leave Room</button>
+            <span id="lobby-wait-msg" class="lobby-wait-msg" hidden data-i18n="waiting_host">Waiting for Host to start...</span>
             <div class="lobby-host-btns">
-              <button id="btn-lobby-start" class="btn-gold-sm" hidden>▶ Start Co-Op Arena (1280×960)</button>
+              <button id="btn-lobby-start" class="btn-gold-sm" hidden data-i18n="start_arena">▶ Start Co-Op Arena (1280×960)</button>
             </div>
           </div>
         </div>
@@ -146,27 +147,27 @@
           <svg id="map-trail" class="map-trail" viewBox="0 0 640 480" preserveAspectRatio="none"></svg>
           <div id="map-nodes" class="map-nodes"></div>
 
-          <div id="map-hover-info" class="orig-map-label">Click any pearl on the map to start!</div>
-          <button id="btn-map-back" class="orig-back-btn">Back to Menu</button>
+          <div id="map-hover-info" class="orig-map-label" data-i18n="map_hint">Click any pearl on the map to start!</div>
+          <button id="btn-map-back" class="orig-back-btn" data-i18n="back_to_menu">Back to Menu</button>
         </div>
       </div>
 
       <!-- Pause Overlay -->
       <div id="overlay-pause" class="overlay">
         <div class="modal small-modal">
-          <h2>PAUSED</h2>
+          <h2 data-i18n="paused">PAUSED</h2>
           <div class="btn-col">
             <button id="btn-resume" class="btn-gold">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              Resume
+              <span data-i18n="resume">Resume</span>
             </button>
             <button id="btn-restart-stage" class="btn-aqua">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              Restart Stage
+              <span data-i18n="restart_stage">Restart Stage</span>
             </button>
             <button id="btn-quit-menu" class="btn-teal">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              Main Menu
+              <span data-i18n="main_menu">Main Menu</span>
             </button>
           </div>
         </div>
@@ -175,10 +176,10 @@
       <!-- Stage Clear Overlay -->
       <div id="overlay-clear" class="overlay">
         <div class="modal small-modal">
-          <h2>STAGE CLEAR!</h2>
+          <h2 data-i18n="stage_clear">STAGE CLEAR!</h2>
           <p id="clear-summary" class="modal-summary"></p>
           <button id="btn-next-stage" class="btn-gold">
-            Next Stage
+            <span data-i18n="next_stage">Next Stage</span>
             <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           </button>
         </div>
@@ -187,16 +188,16 @@
       <!-- Game Over / Won Overlay -->
       <div id="overlay-gameover" class="overlay">
         <div class="modal small-modal">
-          <h2 id="gameover-title">GAME OVER</h2>
+          <h2 id="gameover-title" data-i18n="game_over">GAME OVER</h2>
           <p id="gameover-summary" class="modal-summary"></p>
           <div class="btn-col">
             <button id="btn-retry" class="btn-gold">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-              Try Again
+              <span data-i18n="try_again">Try Again</span>
             </button>
             <button id="btn-go-menu" class="btn-teal">
               <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              Main Menu
+              <span data-i18n="main_menu">Main Menu</span>
             </button>
           </div>
         </div>
