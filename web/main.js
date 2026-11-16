@@ -425,12 +425,12 @@ function renderFrame(hud, frameArray) {
 
 function updateUi(hud) {
   const buffs = [];
-  if (hud.buffs.shield) buffs.push("🛡 SHIELD");
-  if (hud.buffs.speed > 0) buffs.push(`⚡ SPEED ${hud.buffs.speed.toFixed(0)}s`);
-  if (hud.buffs.double_pts > 0) buffs.push(`✨ 2X ${hud.buffs.double_pts.toFixed(0)}s`);
-  if (hud.buffs.poison > 0) buffs.push(`☠ POISON ${hud.buffs.poison.toFixed(0)}s`);
-  if (hud.buffs.stunned > 0) buffs.push(`⚡ STUNNED`);
-  if (hud.player_is_jd) buffs.push(`🌀 JD SUCTION (RMB/E)`);
+  if (hud.buffs.shield) buffs.push("SHIELD");
+  if (hud.buffs.speed > 0) buffs.push(`SPEED ${hud.buffs.speed.toFixed(0)}s`);
+  if (hud.buffs.double_pts > 0) buffs.push(`2X ${hud.buffs.double_pts.toFixed(0)}s`);
+  if (hud.buffs.poison > 0) buffs.push(`POISON ${hud.buffs.poison.toFixed(0)}s`);
+  if (hud.buffs.stunned > 0) buffs.push(`STUNNED`);
+  if (hud.player_is_jd) buffs.push(`JD SUCTION (RMB/E)`);
   ui.buffBar.innerHTML = buffs.map((b) => `<span class="buff-pill">${b}</span>`).join("");
 
   ui.stageBanner.textContent =
@@ -649,7 +649,8 @@ function setupInput() {
 
   ui.btnMute.onclick = () => {
     muted = !muted;
-    ui.btnMute.textContent = muted ? "🔇" : "🔊";
+    document.getElementById("icon-sound-on").hidden = muted;
+    document.getElementById("icon-sound-off").hidden = !muted;
     if (bgmAudio) {
       if (muted) bgmAudio.pause();
       else bgmAudio.play().catch(() => {});

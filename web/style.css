@@ -86,9 +86,22 @@ body {
   width: 34px;
   height: 34px;
   cursor: pointer;
-  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   backdrop-filter: blur(6px);
   transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.orig-coop-title, .btn-gold-sm, .btn-col button, #btn-next-stage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-col button {
+  flex-direction: row;
 }
 
 .glass-btn:hover {
