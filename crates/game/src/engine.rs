@@ -658,13 +658,16 @@ impl Engine {
             p.suck_timer = (p.suck_timer - dt).max(0.0);
         }
 
-        let bonus_speed_mult = if p.speed_boost_timer > 0.0 { 1.8 } else { 1.0 };
+        let is_andy = p.config_key.contains("angelplayer");
+        let is_orville = p.config_key.contains("orcaplayer");
+        let perk_speed_mult = if is_orville { 1.10 } else { 1.0 };
+        let bonus_speed_mult = (if p.speed_boost_timer > 0.0 { 1.8 } else { 1.0 }) * perk_speed_mult;
         let mut spawn_dash_bubbles = None;
 
         if p.stun_timer <= 0.0 {
             if inp.dash_just_pressed && p.dash_cooldown <= 0.0 {
-                p.dash_timer = 0.25;
-                p.dash_cooldown = 0.4;
+                p.dash_timer = if is_orville { 0.31 } else { 0.25 };
+                p.dash_cooldown = if is_andy { 0.30 } else { 0.40 };
                 let (dir_x, dir_y) = if p.vx.abs() > 15.0 || p.vy.abs() > 15.0 {
                     let l = (p.vx * p.vx + p.vy * p.vy).sqrt();
                     (p.vx / l, p.vy / l)
@@ -1011,6 +1014,9 @@ impl Engine {
             let mut nearest_dist = f32::MAX;
             let mut nearest_size = 1.5_f32;
             let mut any_sucking = false;
+            let mut lure_dx = 0.0_f32;
+            let mut lure_dy = 0.0_f32;
+            let mut lure_dist = f32::MAX;
             for p in &self.players {
                 if p.lives <= 0 {
                     continue;
@@ -1024,6 +1030,11 @@ impl Engine {
                     nearest_dy = dy;
                     nearest_size = p.size;
                     any_sucking = p.suck_timer > 0.0;
+                }
+                if p.config_key.contains("anglerplayer") && d < lure_dist {
+                    lure_dist = d;
+                    lure_dx = dx;
+                    lure_dy = dy;
                 }
             }
 
@@ -1093,6 +1104,9 @@ impl Engine {
                     if any_sucking && cfg.size <= nearest_size && nearest_dist < 230.0 {
                         e.vx += (nearest_dx / nearest_dist) * 560.0 * dt;
                         e.vy += (nearest_dy / nearest_dist) * 560.0 * dt;
+                    } else if lure_dist < 105.0 && cfg.size <= nearest_size {
+                        e.vx += (lure_dx / lure_dist) * 180.0 * dt;
+                        e.vy += (lure_dy / lure_dist) * 180.0 * dt;
                     }
 
                     if nearest_dist < cfg.sight_dist {
@@ -1342,18 +1356,32 @@ impl Engine {
                     FishKind::Poison => {
                         if p_mouth.intersects(&e_body) {
                             self.enemies[i].alive = false;
-                            self.players[pidx].poison_timer = 4.0;
-                            self.sounds.push("playerPoison.wav".to_string());
-                            self.popups.push(Popup {
-                                x: self.players[pidx].x,
-                                y: self.players[pidx].y - 28.0,
-                                vy: -35.0,
-                                text: "POISONED!".to_string(),
-                                color: "#76ff03".to_string(),
-                                life: 0.0,
-                                max_life: 1.1,
-                                scale: 1.1,
-                            });
+                            if self.players[pidx].config_key.contains("lionplayer") {
+                                self.sounds.push("playerEat.wav".to_string());
+                                self.popups.push(Popup {
+                                    x: self.players[pidx].x,
+                                    y: self.players[pidx].y - 28.0,
+                                    vy: -35.0,
+                                    text: "IMMUNE!".to_string(),
+                                    color: "#69f0ae".to_string(),
+                                    life: 0.0,
+                                    max_life: 0.9,
+                                    scale: 1.0,
+                                });
+                            } else {
+                                self.players[pidx].poison_timer = 4.0;
+                                self.sounds.push("playerPoison.wav".to_string());
+                                self.popups.push(Popup {
+                                    x: self.players[pidx].x,
+                                    y: self.players[pidx].y - 28.0,
+                                    vy: -35.0,
+                                    text: "POISONED!".to_string(),
+                                    color: "#76ff03".to_string(),
+                                    life: 0.0,
+                                    max_life: 1.1,
+                                    scale: 1.1,
+                                });
+                            }
                         }
                     }
                     _ => {
@@ -1365,7 +1393,12 @@ impl Engine {
                                 self.fish_eaten += 1;
 
                                 let double_mult = if self.players[pidx].double_pts_timer > 0.0 { 2 } else { 1 };
-                                let pts = (cfg.food_value as u32) * self.frenzy_mult * double_mult;
+                                let eddie_bonus = if self.players[pidx].config_key.contains("anglerplayer") {
+                                    1.10
+                                } else {
+                                    1.0
+                                };
+                                let pts = ((cfg.food_value * eddie_bonus) as u32) * self.frenzy_mult * double_mult;
                                 self.score += pts;
                                 if self.score > self.high_score {
                                     self.high_score = self.score;
@@ -1374,7 +1407,12 @@ impl Engine {
                                 self.team_food_progress += cfg.food_value;
 
                                 let prev_frenzy = self.frenzy;
-                                self.frenzy = (self.frenzy + 0.16).min(1.0);
+                                let frenzy_gain = if self.players[pidx].config_key.contains("lionplayer") {
+                                    0.185
+                                } else {
+                                    0.16
+                                };
+                                self.frenzy = (self.frenzy + frenzy_gain).min(1.0);
                                 if prev_frenzy < 0.5 && self.frenzy >= 0.5 {
                                     self.sounds.push("feedingFrenzy.wav".to_string());
                                     self.popups.push(Popup {
