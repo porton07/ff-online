@@ -1214,8 +1214,13 @@ impl Engine {
             let px = self.players[pidx].x;
             let py = self.players[pidx].y;
             let p_facing = self.players[pidx].facing_right;
-            let pw = pw_raw * p_scale;
-            let ph = ph_raw * p_scale;
+            let p_norm = if self.players.len() > 1 {
+                150.0 / pw_raw.max(1.0)
+            } else {
+                1.0
+            };
+            let pw = pw_raw * p_scale * p_norm;
+            let ph = ph_raw * p_scale * p_norm;
             let p_hs = pcfg.as_ref().map(|c| c.hot_spot).unwrap_or([-15.0, -24.0, 30.0, 25.0]);
             let p_col = pcfg.as_ref().map(|c| c.collision).unwrap_or([5.0, 19.0, 95.0, 90.0]);
 
@@ -1806,8 +1811,13 @@ impl Engine {
                         if let Some(id) = self.data.image_id(&fr.path) {
                             let flip = if p.facing_right { -1.0 } else { 1.0 };
                             let rot_sign = if p.facing_right { 1.0 } else { -1.0 };
-                            let w = fr.w * p.scale;
-                            let h = fr.h * p.scale;
+                            let norm = if self.players.len() > 1 {
+                                150.0 / fr.w.max(1.0)
+                            } else {
+                                1.0
+                            };
+                            let w = fr.w * p.scale * norm;
+                            let h = fr.h * p.scale * norm;
                             let alpha = if p.invuln_timer > 0.0
                                 && ((p.invuln_timer * 14.0) as i32) % 2 == 0
                             {

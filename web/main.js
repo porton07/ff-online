@@ -55,7 +55,6 @@ const PLAYABLE_FISH = [
 
 function renderLobby() {
   ui.lobbyCode.textContent = coop.code || "----";
-  ui.btnLobbyMap.hidden = !coop.isHost;
   ui.btnLobbyStart.hidden = !coop.isHost;
   ui.lobbyWaitMsg.hidden = coop.isHost;
 
@@ -729,12 +728,8 @@ function setupInput() {
     if (!code) return;
     connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=join`);
   };
-  document.getElementById("btn-coop-start").onclick = () => openStoryMap();
-  document.getElementById("btn-lobby-map").onclick = () => {
-    ui.ovLobby.classList.remove("active");
-    openStoryMap();
-  };
-  document.getElementById("btn-lobby-start").onclick = () => startStage(0, false, true);
+  document.getElementById("btn-coop-start").onclick = () => startStage(32, false, true);
+  document.getElementById("btn-lobby-start").onclick = () => startStage(32, false, true);
   document.getElementById("btn-lobby-leave").onclick = () => location.reload();
   ui.lobbyNameInput.addEventListener("input", () => {
     coop.myName = ui.lobbyNameInput.value.trim().slice(0, 12);
