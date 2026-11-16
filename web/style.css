@@ -247,8 +247,9 @@ body {
 
 .orig-coop-bar {
   position: absolute;
-  left: 2.5%;
-  bottom: 5%;
+  left: auto;
+  right: 2.5%;
+  bottom: 9%;
   transform: none;
   background: rgba(3, 24, 48, 0.78);
   border: 1.5px solid rgba(130, 225, 255, 0.42);
@@ -317,9 +318,9 @@ body {
 
 .orig-controls-hint {
   position: absolute;
-  left: 50%;
-  bottom: 3%;
-  transform: translateX(-50%);
+  left: 3%;
+  bottom: 2.5%;
+  transform: none;
   font-size: 0.72rem;
   color: #dff4ff;
   text-shadow: 0 1px 4px #000;
