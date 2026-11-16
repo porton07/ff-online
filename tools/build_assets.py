@@ -406,7 +406,7 @@ def main():
             shutil.copy2(splash, dst)
 
     # Copy map, menu, and HUD images
-    for ui_img in ["resources/map/mapBG.jpg", "resources/menus/mainMenuBG.jpg"]:
+    for ui_img in ["resources/menus/mapBg.jpg", "resources/menus/mainMenuBG.jpg"]:
         raw_ui = find_raw_ci(ui_img)
         if raw_ui:
             composite_image(raw_ui, raw_ui.relative_to(RAW).as_posix())

@@ -30,48 +30,38 @@
 
       <!-- Title Overlay -->
       <div id="overlay-title" class="overlay active">
-        <div class="menu-shell">
+        <div class="menu-shell-single">
           <div class="hero-section">
             <h1 class="game-logo">FEEDING FRENZY</h1>
             <p class="hero-sub">40 Stages • 5 Playable Fish • Online Co-Op</p>
           </div>
 
-          <div class="menu-columns">
-            <!-- Section 1: Solo & Co-Op -->
-            <div class="menu-card">
-              <div class="section-title">🎮 SOLO PLAY</div>
-              <div class="solo-actions">
-                <button id="btn-play-story" class="btn-gold">
-                  <span class="btn-main">▶ Story Mode</span>
-                  <span class="btn-desc">Start from Stage 1 as Andy</span>
-                </button>
-                <button id="btn-play-timed" class="btn-aqua">
-                  <span class="btn-main">⏱ Time Attack</span>
-                  <span class="btn-desc">Beat the clock for high score</span>
-                </button>
-              </div>
-
-              <div class="divider"></div>
-
-              <div class="section-title">🌐 ONLINE CO-OP (2–4 PLAYERS)</div>
-              <div class="coop-panel">
-                <button id="btn-coop-create" class="btn-teal">Create Room</button>
-                <div class="coop-join">
-                  <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
-                  <button id="btn-coop-join" class="btn-aqua-sm">Join</button>
-                </div>
-              </div>
-              <div id="coop-lobby" class="coop-lobby" hidden>
-                <span id="coop-status"></span>
-                <button id="btn-coop-start" class="btn-gold-sm" hidden>▶ Start Co-Op</button>
-              </div>
+          <div class="menu-card main-card">
+            <div class="section-title">🎮 PLAY</div>
+            <div class="solo-actions">
+              <button id="btn-play-story" class="btn-gold">
+                <span class="btn-main">▶ Story Mode</span>
+                <span class="btn-desc">Explore the Ocean Map &amp; choose any of 40 stages</span>
+              </button>
+              <button id="btn-play-timed" class="btn-aqua">
+                <span class="btn-main">⏱ Time Attack</span>
+                <span class="btn-desc">Beat the clock for high score</span>
+              </button>
             </div>
 
-            <!-- Section 2: Stage Select by Character -->
-            <div class="menu-card">
-              <div class="section-title">🗺 STAGE SELECT</div>
-              <div id="char-tabs" class="char-tabs"></div>
-              <div id="stage-grid" class="stage-grid"></div>
+            <div class="divider"></div>
+
+            <div class="section-title">🌐 ONLINE CO-OP (2–4 PLAYERS)</div>
+            <div class="coop-panel">
+              <button id="btn-coop-create" class="btn-teal">Create Room</button>
+              <div class="coop-join">
+                <input id="coop-code-input" type="text" maxlength="4" placeholder="CODE" />
+                <button id="btn-coop-join" class="btn-aqua-sm">Join</button>
+              </div>
+            </div>
+            <div id="coop-lobby" class="coop-lobby" hidden>
+              <span id="coop-status"></span>
+              <button id="btn-coop-start" class="btn-gold-sm" hidden>▶ Choose Stage on Map</button>
             </div>
           </div>
 
@@ -80,6 +70,19 @@
             <span><b>Click</b> / <b>Space</b> Dash</span>
             <span><b>Right-Click</b> / <b>E</b> JD Suction</span>
             <span><b>Esc</b> Pause</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Story Mode Map Overlay -->
+      <div id="overlay-map" class="overlay map-overlay">
+        <div class="map-container">
+          <img class="map-bg" src="assets/resources/menus/mapBg.jpg" alt="Ocean Map" />
+          <svg id="map-trail" class="map-trail" viewBox="0 0 640 480" preserveAspectRatio="none"></svg>
+          <div id="map-nodes" class="map-nodes"></div>
+          <div class="map-topbar">
+            <button id="btn-map-back" class="btn-aqua-sm">← Back</button>
+            <div id="map-hover-info" class="map-hover-info">Click any stage pearl on the map to dive in!</div>
           </div>
         </div>
       </div>

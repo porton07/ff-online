@@ -4,9 +4,11 @@ const ctx = canvas.getContext("2d");
 const ui = {
   buffBar: document.getElementById("buff-bar"),
   stageBanner: document.getElementById("stage-banner"),
-  charTabs: document.getElementById("char-tabs"),
-  stageGrid: document.getElementById("stage-grid"),
   ovTitle: document.getElementById("overlay-title"),
+  ovMap: document.getElementById("overlay-map"),
+  mapNodes: document.getElementById("map-nodes"),
+  mapTrail: document.getElementById("map-trail"),
+  mapHoverInfo: document.getElementById("map-hover-info"),
   ovPause: document.getElementById("overlay-pause"),
   ovClear: document.getElementById("overlay-clear"),
   ovGameOver: document.getElementById("overlay-gameover"),
@@ -110,36 +112,39 @@ function readStr(ptr, len) {
   return new TextDecoder().decode(bytes);
 }
 
+function openStoryMap() {
+  ui.ovTitle.classList.remove("active");
+  ui.ovMap.classList.add("active");
+}
+
+function closeStoryMap() {
+  ui.ovMap.classList.remove("active");
+  ui.ovTitle.classList.add("active");
+}
+
 function buildStageGrid() {
-  const chars = [];
-  manifest.forEach((entry) => {
-    if (!chars.includes(entry.character)) chars.push(entry.character);
-  });
-  if (!chars.includes(selectedChar) && chars.length > 0) {
-    selectedChar = chars[0];
-  }
-
-  ui.charTabs.innerHTML = "";
-  chars.forEach((ch) => {
-    const tab = document.createElement("button");
-    tab.className = "char-tab" + (ch === selectedChar ? " active" : "");
-    tab.textContent = ch;
-    tab.onclick = () => {
-      selectedChar = ch;
-      buildStageGrid();
-    };
-    ui.charTabs.appendChild(tab);
-  });
-
-  ui.stageGrid.innerHTML = "";
+  ui.mapNodes.innerHTML = "";
+  const pts = [];
   manifest.forEach((entry, idx) => {
-    if (entry.character !== selectedChar) return;
-    const btn = document.createElement("button");
-    btn.className = "stage-btn";
-    btn.innerHTML = `<span class="stage-num">Stage ${idx + 1}</span>${entry.name}`;
-    btn.onclick = () => startStage(idx, false, true);
-    ui.stageGrid.appendChild(btn);
+    const [mx, my] = entry.mapPos || [320, 240];
+    pts.push(`${mx},${my}`);
+    const node = document.createElement("button");
+    node.className = `map-node char-${entry.character}`;
+    node.style.left = `${(mx / 640) * 100}%`;
+    node.style.top = `${(my / 480) * 100}%`;
+    node.textContent = String(idx + 1);
+    node.title = `Stage ${idx + 1}: ${entry.name} (${entry.character})`;
+    node.onmouseenter = () => {
+      ui.mapHoverInfo.textContent = `Stage ${idx + 1}: ${entry.name} • ${entry.character}`;
+    };
+    node.onclick = () => {
+      ui.ovMap.classList.remove("active");
+      startStage(idx, false, true);
+    };
+    ui.mapNodes.appendChild(node);
   });
+
+  ui.mapTrail.innerHTML = `<polyline points="${pts.join(" ")}" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2" stroke-dasharray="5,4" />`;
 }
 
 function startStage(idx, timedMode, resetRun) {
@@ -419,7 +424,7 @@ function updateUi(hud) {
       ? ""
       : `${hud.character} • Stage ${hud.stage_idx + 1}/${hud.stage_count}: ${hud.stage_name}`;
 
-  ui.ovTitle.classList.toggle("active", hud.state === "title");
+  ui.ovTitle.classList.toggle("active", hud.state === "title" && !ui.ovMap.classList.contains("active"));
   ui.ovPause.classList.toggle("active", hud.state === "paused");
   ui.ovClear.classList.toggle("active", hud.state === "stage_clear");
   ui.ovGameOver.classList.toggle(
@@ -598,7 +603,8 @@ function setupInput() {
     }
   });
 
-  document.getElementById("btn-play-story").onclick = () => startStage(0, false, true);
+  document.getElementById("btn-play-story").onclick = () => openStoryMap();
+  document.getElementById("btn-map-back").onclick = () => closeStoryMap();
   document.getElementById("btn-play-timed").onclick = () => startStage(0, true, true);
   document.getElementById("btn-coop-create").onclick = async () => {
     const r = await fetch("/api/create");
@@ -610,7 +616,7 @@ function setupInput() {
     if (!code) return;
     connectCoopWs(`/ws?code=${encodeURIComponent(code)}&role=join`);
   };
-  document.getElementById("btn-coop-start").onclick = () => startStage(0, false, true);
+  document.getElementById("btn-coop-start").onclick = () => openStoryMap();
   document.getElementById("btn-resume").onclick = () => wasm.toggle_pause();
   document.getElementById("btn-restart-stage").onclick = () => {
     if (lastHud) startStage(lastHud.stage_idx, lastHud.timed_mode, false);
